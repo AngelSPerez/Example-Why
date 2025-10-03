@@ -30,9 +30,8 @@
         .card-container { display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px; box-sizing: border-box; }
         .install-card {
             background: var(--surface-color);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px; padding: 40px; text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
             backdrop-filter: blur(10px); max-width: 400px; animation: fadeIn 0.8s ease-in-out;
         }
         .app-icon { width: 100px; height: 100px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
@@ -72,7 +71,7 @@
         .modal-content {
             background-color: #282828; padding: 25px; border-radius: 16px;
             width: 90%; max-width: 320px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            text-align: left; animation: fadeIn 0.5s;
+            text-align: left; animation: fadeIn 0.5s; position: relative;
         }
         .modal-content h2 { font-size: 18px; margin: 0 0 15px; color: var(--text-color); }
         .modal-content p { margin: 0; line-height: 1.5; font-size: 15px; color: var(--text-secondary); }
@@ -141,44 +140,44 @@
 
         let deferredPrompt;
 
-        // Detectar plataforma
         const ua = navigator.userAgent || navigator.vendor || window.opera;
         const isIOS = /iPhone|iPad|iPod/i.test(ua);
         const isAndroid = /Android/i.test(ua);
 
-        // Mostrar instrucciones según el dispositivo
+        // Mostrar según plataforma
         if (isIOS) {
             modalIOS.style.display = 'flex';
             instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iOS.';
         } else if (isAndroid) {
             modalAndroid.style.display = 'flex';
         } else {
-            // Para PC y otros navegadores mostrar banner de instalación genérico
             installPromptDiv.style.display = 'flex';
             instructions.textContent = 'Haz clic en el botón "Instalar" para añadir la aplicación a tu dispositivo.';
         }
 
-        // Instalación en Android
+        // Android PWA
         window.addEventListener('beforeinstallprompt', (e) => {
-            if (isAndroid) {
-                e.preventDefault();
-                deferredPrompt = e;
-                installPromptDiv.style.display = 'flex';
-            }
+            e.preventDefault();
+            deferredPrompt = e;
+            installPromptDiv.style.display = 'flex';
         });
 
         installButton.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            installPromptDiv.style.display = 'none';
-            statusText.innerHTML = `<div class="loader"></div><span>Instalando...</span>`;
-            instructions.style.display = 'none';
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'dismissed') {
-                statusText.innerHTML = '<span>Listo para instalar</span>';
-                instructions.style.display = 'block';
+            if (deferredPrompt) {
+                installPromptDiv.style.display = 'none';
+                statusText.innerHTML = `<div class="loader"></div><span>Instalando...</span>`;
+                instructions.style.display = 'none';
+
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'dismissed') {
+                    statusText.innerHTML = '<span>Listo para instalar</span>';
+                    instructions.style.display = 'block';
+                }
+                deferredPrompt = null;
+            } else {
+                alert('Para instalar la aplicación:\n- Chrome/Edge: usa el icono "+" en la barra de direcciones o el menú "Instalar".\n- Safari: abre el menú "Compartir" y elige "Añadir a inicio".');
             }
-            deferredPrompt = null;
         });
 
         window.addEventListener('appinstalled', () => {
