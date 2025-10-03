@@ -210,25 +210,29 @@
         const isPWA = () => window.matchMedia('(display-mode: standalone)').matches;
         const isEmbeddedBrowser = () => /(FBAN|FBAV|Instagram|WebView|wv)/i.test(navigator.userAgent);
 
-        function showModalForAndroidWebView() { // Función renombrada para mayor claridad
+        // *** MODIFICACIÓN A ESTA FUNCIÓN ***
+        function showModalForAndroidWebView() { 
             modal.style.display = 'flex';
-            installPromptDiv.style.display = 'none';
-            modal.querySelector("h2").textContent = "Instalar en Android";
-            modal.querySelector("p").textContent = "Para instalar la aplicación, abre la página en tu navegador predeterminado y vuelve a intentarlo:";
+            // Oculta el banner PWA principal
+            installPromptDiv.style.display = 'none'; 
+            
+            modal.querySelector("h2").textContent = "Abre en tu navegador";
+            modal.querySelector("p").textContent = "Para instalar la aplicación, debes abrir la página en un navegador compatible (Chrome o Firefox):";
             modal.querySelector(".step:nth-child(1) span:nth-child(2)").innerHTML = `Toca el menú <b>⋮</b> de la esquina.`;
-            modal.querySelector(".step:nth-child(2) span:nth-child(2)").innerHTML = `Selecciona "<b>Abrir en el navegador</b>".`; // Se dejó la instrucción de abrir en navegador
+            modal.querySelector(".step:nth-child(2) span:nth-child(2)").innerHTML = `Selecciona "<b>Abrir en el navegador</b>".`;
         }
 
         function maybeShowModal() {
             if (localStorage.getItem("pwaInstructionsShown")) return;
 
             if (isIOS() && !isPWA()) {
-                // Mantiene la lógica para iOS
+                // Muestra las instrucciones de iOS (Compartir -> Añadir a inicio)
                 modal.style.display = 'flex';
                 localStorage.setItem("pwaInstructionsShown", "true");
             } 
-            // MODIFICACIÓN CLAVE AQUÍ: Solo muestra el modal si es Android Y es un Embedded Browser
+            // *** MODIFICACIÓN CLAVE AQUÍ: Solo muestra el modal si es Android Y es un Embedded Browser (WebView) ***
             else if (isAndroid() && isEmbeddedBrowser()) {
+                // Muestra las instrucciones para salir del WebView de Android
                 showModalForAndroidWebView();
                 localStorage.setItem("pwaInstructionsShown", "true");
             }
@@ -239,12 +243,15 @@
             maybeShowModal();
         })();
 
+        // *** MODIFICACIÓN CLAVE AQUÍ: Lógica para mostrar el banner PWA en navegadores convencionales ***
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Asegura que el prompt de instalación nativo no se muestre en iOS o en navegadores incrustados (WebViews)
-            if (isIOS() || isEmbeddedBrowser() || isPWA()) return;
+            // Si estamos en iOS, en un WebView o ya instalado, no hacemos nada (el banner no debe aparecer)
+            if (isIOS() || isEmbeddedBrowser() || isPWA()) return; 
+            
+            // Si estamos en un navegador convencional (donde el banner SI debe aparecer):
             e.preventDefault();
             deferredPrompt = e;
-            installPromptDiv.style.display = 'flex';
+            installPromptDiv.style.display = 'flex'; // Muestra el banner superior
         });
 
         installButton.addEventListener('click', async () => {
