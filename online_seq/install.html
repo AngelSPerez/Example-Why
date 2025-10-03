@@ -149,10 +149,13 @@
         // Mostrar instrucciones según el dispositivo
         if (isIOS) {
             modalIOS.style.display = 'flex';
-            installPromptDiv.style.display = 'none';
             instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iOS.';
         } else if (isAndroid) {
             modalAndroid.style.display = 'flex';
+        } else {
+            // Para PC y otros navegadores mostrar banner de instalación genérico
+            installPromptDiv.style.display = 'flex';
+            instructions.textContent = 'Haz clic en el botón "Instalar" para añadir la aplicación a tu dispositivo.';
         }
 
         // Instalación en Android
@@ -181,6 +184,25 @@
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
         });
+
+        // --- Botones de cierre para modales ---
+        const createCloseButton = (modal) => {
+            const btn = document.createElement('button');
+            btn.textContent = '✖';
+            btn.style.position = 'absolute';
+            btn.style.top = '10px';
+            btn.style.right = '10px';
+            btn.style.background = 'transparent';
+            btn.style.color = '#fff';
+            btn.style.border = 'none';
+            btn.style.fontSize = '18px';
+            btn.style.cursor = 'pointer';
+            btn.addEventListener('click', () => { modal.style.display = 'none'; });
+            modal.querySelector('.modal-content').appendChild(btn);
+        }
+
+        createCloseButton(modalAndroid);
+        createCloseButton(modalIOS);
     </script>
 </body>
 </html>
