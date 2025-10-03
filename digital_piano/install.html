@@ -1,279 +1,207 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instalador de WhyStore</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#121212">
-    <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalador de WhyStore</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
 
-    <style>
-        /* --- VARIABLES DE COLOR Y FUENTES --- */
-        :root {
-            --bg-color: #121212;
-            --surface-color: rgba(30, 30, 30, 0.7);
-            --primary-color: #0d6efd;
-            --primary-hover: #0b5ed7;
-            --text-color: #e0e0e0;
-            --text-secondary: #a0a0a0;
-            --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        }
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: rgba(30, 30, 30, 0.7);
+            --primary-color: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            overflow: hidden; font-family: var(--font-stack);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 10% 20%, rgba(100, 100, 255, 0.1), transparent 30%),
+                              radial-gradient(circle at 80% 90%, rgba(255, 100, 100, 0.1), transparent 30%);
+            color: var(--text-color);
+        }
+        .card-container { display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px; box-sizing: border-box; }
+        .install-card {
+            background: var(--surface-color);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(10px); max-width: 400px; animation: fadeIn 0.8s ease-in-out;
+        }
+        .app-icon { width: 100px; height: 100px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        h1 { font-size: 2.2rem; margin: 20px 0 5px 0; }
+        #status-text { font-size: 1.2rem; color: var(--text-secondary); font-weight: 300; height: 25px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .instructions { color: var(--text-secondary); margin-top: 20px; line-height: 1.6; }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            font-family: var(--font-stack);
-            background-color: var(--bg-color);
-            background-image: radial-gradient(circle at 10% 20%, rgba(100, 100, 255, 0.1), transparent 30%),
-                              radial-gradient(circle at 80% 90%, rgba(255, 100, 100, 0.1), transparent 30%);
-            color: var(--text-color);
-        }
+        #install-prompt {
+            display: none; position: fixed; top: 15px; right: 80px;
+            background-color: #282828; color: white; padding: 15px 20px;
+            border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 1000; align-items: center; gap: 15px; animation: fadeInDown 0.5s;
+        }
+        #install-prompt::after {
+            content: ''; position: absolute; top: -10px; right: 25px;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-bottom: 10px solid #282828;
+        }
+        #install-button {
+            background-color: var(--primary-color); color: white;
+            border: none; padding: 8px 15px; border-radius: 8px;
+            cursor: pointer; font-weight: bold; font-size: 14px;
+        }
+        #install-button:hover { background-color: var(--primary-hover); }
 
-        .card-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .install-card {
-            background: var(--surface-color);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            max-width: 400px;
-            animation: fadeIn 0.8s ease-in-out;
-        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%;
+            border-top: 4px solid #fff; width: 20px; height: 20px;
+            animation: spin 1s linear infinite;
+        }
 
-        .app-icon {
-            width: 100px;
-            height: 100px;
-            border-radius: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        h1 {
-            font-size: 2.2rem;
-            margin: 20px 0 5px 0;
-        }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); display: none;
+            justify-content: center; align-items: center; z-index: 2000;
+        }
+        .modal-content {
+            background-color: #282828; padding: 25px; border-radius: 16px;
+            width: 90%; max-width: 320px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-align: left; animation: fadeIn 0.5s; position: relative;
+        }
+        .modal-content h2 { font-size: 18px; margin: 0 0 15px; color: var(--text-color); }
+        .modal-content p { margin: 0; line-height: 1.5; font-size: 15px; color: var(--text-secondary); }
+        .modal-content .step { display: flex; align-items: center; margin-top: 15px; }
+        .modal-content .step-number { background-color: #444; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; }
+        .modal-content .three-dots { font-weight: bold; font-size: 20px; vertical-align: middle; }
 
-        #status-text {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            font-weight: 300;
-            height: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .instructions {
-            color: var(--text-secondary);
-            margin-top: 20px;
-            line-height: 1.6;
-        }
-
-        #install-prompt {
-            display: none; 
-            position: fixed;
-            top: 15px;
-            right: 80px;
-            background-color: #282828;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            gap: 15px;
-            animation: fadeInDown 0.5s;
-        }
-
-        #install-prompt::after {
-            content: '';
-            position: absolute;
-            top: -10px;
-            right: 25px;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 10px solid #282828;
-        }
-        
-        #install-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }
-
-        #install-button:hover {
-            background-color: var(--primary-hover);
-        }
-        
-        .loader {
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            border-top: 4px solid #fff;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
-
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background-color: rgba(0, 0, 0, 0.7); 
-            display: none;
-            justify-content: center; align-items: center; 
-            z-index: 2000; 
-        }
-        .modal-content { 
-            background-color: #282828; 
-            padding: 25px; border-radius: 16px; 
-            width: 90%; max-width: 320px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
-            text-align: left; 
-            animation: fadeIn 0.5s; 
-        }
-        .modal-content h2 { font-size: 18px; margin-top: 0; margin-bottom: 15px; color: var(--text-color); }
-        .modal-content p { margin: 0; line-height: 1.5; font-size: 15px; color: var(--text-secondary); }
-        .modal-content .step { display: flex; align-items: center; margin-top: 15px; }
-        .modal-content .step-number { background-color: #444; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; }
-        .modal-content .three-dots { font-weight: bold; font-size: 20px; vertical-align: middle; }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+        @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95);} to { opacity: 1; transform: scale(1);} }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px);} to { opacity: 1; transform: translateY(0);} }
+    </style>
 </head>
 <body>
-    
-        <div id="pwa-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Ultimos pasos</h2>
-            <p>Para continuar, por favor sigue las instrucciones.</p>
-            <div class="step">
-                <span class="step-number">1</span>
-                <span>Toca el menú <span class="three-dots">⋮</span> de la esquina.</span>
-            </div>
-            <div class="step">
-                <span class="step-number">2</span>
-                <span>Selecciona "<b>Abrir en el navegador</b>".</span>
-            </div>
-        </div>
-    </div>
+    
+    <div id="pwa-modal-android" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Últimos pasos en Android</h2>
+            <p>Sigue estas instrucciones:</p>
+            <div class="step">
+                <span class="step-number">1</span>
+                <span>Toca el menú <span class="three-dots">⋮</span> de la esquina.</span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span>Selecciona "<b>Abrir en el navegador</b>".</span>
+            </div>
+        </div>
+    </div>
 
-    <div id="install-prompt">
-        <span>Instala la aplicación para un acceso rápido</span>
-        <button id="install-button">Instalar</button>
-    </div>
+    <div id="pwa-modal-ios" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Instalar en iPhone / iPad</h2>
+            <p>Sigue estos pasos para instalar la WhyApp:</p>
+            <div class="step">
+                <span class="step-number">1</span>
+                <span>Toca el botón <b>Compartir 📤</b></span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span>Selecciona "<b>Añadir a inicio</b>".</span>
+            </div>
+        </div>
+    </div>
 
-    <main class="card-container">
-        <div class="install-card">
-            <img src="images/icons/icon192.png" alt="Logo de la App" class="app-icon">
-            <h1>Digital Piano</h1>
-            <h2 id="status-text"><span>Listo para instalar</span></h2>
-            <p class="instructions">
-                Haz clic en el botón <strong>Instalar</strong> que aparece en la notificación superior para añadir la aplicación a tu dispositivo.
-            </p>
-        </div>
-    </main>
+    <div id="install-prompt">
+        <span>Instala la aplicación para un acceso rápido</span>
+        <button id="install-button">Instalar</button>
+    </div>
 
-    <script>
-        const installPromptDiv = document.getElementById('install-prompt');
-        const installButton = document.getElementById('install-button');
-        const statusText = document.getElementById('status-text');
-        const instructions = document.querySelector('.instructions');
-        const modal = document.getElementById('pwa-modal');
+    <main class="card-container">
+        <div class="install-card">
+            <img src="images/icons/icon192.png" alt="Logo de Online Sequencer" class="app-icon">
+            <h1>Digital Piano</h1>
+            <h2 id="status-text"><span>Listo para instalar</span></h2>
+            <p class="instructions">Haz clic en el botón <strong>Instalar</strong> que aparece en la notificación superior para añadir la aplicación a tu dispositivo.</p>
+        </div>
+    </main>
 
-        let deferredPrompt;
+    <script>
+        const installPromptDiv = document.getElementById('install-prompt');
+        const installButton = document.getElementById('install-button');
+        const statusText = document.getElementById('status-text');
+        const instructions = document.querySelector('.instructions');
+        const modalAndroid = document.getElementById('pwa-modal-android');
+        const modalIOS = document.getElementById('pwa-modal-ios');
 
-        const isMobileDevice = () => /Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent);
-        const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const isAndroid = () => /Android/i.test(navigator.userAgent);
-        const isPWA = () => window.matchMedia('(display-mode: standalone)').matches;
-        const isEmbeddedBrowser = () => /(FBAN|FBAV|Instagram|WebView|wv)/i.test(navigator.userAgent);
+        let deferredPrompt;
 
-        // *** MODIFICACIÓN A ESTA FUNCIÓN ***
-        function showModalForAndroidWebView() { 
-            modal.style.display = 'flex';
-            // Oculta el banner PWA principal
-            installPromptDiv.style.display = 'none'; 
-            
-            modal.querySelector("h2").textContent = "Abre en tu navegador";
-            modal.querySelector("p").textContent = "Para instalar la aplicación, debes abrir la página en un navegador compatible (Chrome o Firefox):";
-            modal.querySelector(".step:nth-child(1) span:nth-child(2)").innerHTML = `Toca el menú <b>⋮</b> de la esquina.`;
-            modal.querySelector(".step:nth-child(2) span:nth-child(2)").innerHTML = `Selecciona "<b>Abrir en el navegador</b>".`;
-        }
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isIOS = /iPhone|iPad|iPod/i.test(ua);
+        const isAndroid = /Android/i.test(ua);
 
-        function maybeShowModal() {
-            if (localStorage.getItem("pwaInstructionsShown")) return;
+        // Mostrar según plataforma
+        if (isIOS) {
+            modalIOS.style.display = 'flex';
+            instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iOS.';
+        } else if (isAndroid) {
+            modalAndroid.style.display = 'flex';
+        } else {
+            installPromptDiv.style.display = 'flex';
+            instructions.textContent = 'Haz clic en el botón "Instalar" para añadir la aplicación a tu dispositivo.';
+        }
 
-            if (isIOS() && !isPWA()) {
-                // Muestra las instrucciones de iOS (Compartir -> Añadir a inicio)
-                modal.style.display = 'flex';
-                localStorage.setItem("pwaInstructionsShown", "true");
-            } 
-            // *** MODIFICACIÓN CLAVE AQUÍ: Solo muestra el modal si es Android Y es un Embedded Browser (WebView) ***
-            else if (isAndroid() && isEmbeddedBrowser()) {
-                // Muestra las instrucciones para salir del WebView de Android
-                showModalForAndroidWebView();
-                localStorage.setItem("pwaInstructionsShown", "true");
-            }
-        }
+        // Android PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPromptDiv.style.display = 'flex';
+        });
 
-        (function () {
-            if (!isMobileDevice()) return;
-            maybeShowModal();
-        })();
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                installPromptDiv.style.display = 'none';
+                statusText.innerHTML = `<div class="loader"></div><span>Instalando...</span>`;
+                instructions.style.display = 'none';
 
-        // *** MODIFICACIÓN CLAVE AQUÍ: Lógica para mostrar el banner PWA en navegadores convencionales ***
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Si estamos en iOS, en un WebView o ya instalado, no hacemos nada (el banner no debe aparecer)
-            if (isIOS() || isEmbeddedBrowser() || isPWA()) return; 
-            
-            // Si estamos en un navegador convencional (donde el banner SI debe aparecer):
-            e.preventDefault();
-            deferredPrompt = e;
-            installPromptDiv.style.display = 'flex'; // Muestra el banner superior
-        });
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'dismissed') {
+                    statusText.innerHTML = '<span>Listo para instalar</span>';
+                    instructions.style.display = 'block';
+                }
+                deferredPrompt = null;
+            } else {
+                alert('Para instalar la aplicación:\n- Chrome/Edge: usa el icono "+" en la barra de direcciones o el menú "Instalar".\n- Safari: abre el menú "Compartir" y elige "Añadir a inicio".');
+            }
+        });
 
-        installButton.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            installPromptDiv.style.display = 'none';
-            statusText.innerHTML = `<div class="loader"></div><span>Instalando...</span>`;
-            instructions.style.display = 'none';
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'dismissed') {
-                statusText.innerHTML = '<span>Listo para instalar</span>';
-                instructions.style.display = 'block';
-            }
-            deferredPrompt = null;
-        });
+        window.addEventListener('appinstalled', () => {
+            statusText.innerHTML = '<span>¡Instalación completa!</span>';
+        });
 
-        window.addEventListener('appinstalled', () => {
-            statusText.innerHTML = '<span>¡Instalación completa!</span>';
-            if (!isMobileDevice()) {
-                setTimeout(() => window.location.href = 'index.html', 2000);
-            }
-        });
-    </script>
+        // --- Botones de cierre para modales ---
+        const createCloseButton = (modal) => {
+            const btn = document.createElement('button');
+            btn.textContent = '✖';
+            btn.style.position = 'absolute';
+            btn.style.top = '10px';
+            btn.style.right = '10px';
+            btn.style.background = 'transparent';
+            btn.style.color = '#fff';
+            btn.style.border = 'none';
+            btn.style.fontSize = '18px';
+            btn.style.cursor = 'pointer';
+            btn.addEventListener('click', () => { modal.style.display = 'none'; });
+            modal.querySelector('.modal-content').appendChild(btn);
+        }
+
+        createCloseButton(modalAndroid);
+        createCloseButton(modalIOS);
+    </script>
 </body>
 </html>
