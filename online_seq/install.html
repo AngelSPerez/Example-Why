@@ -184,8 +184,15 @@
             }
         });
 
+        // --- Redirección solo en PC ---
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
+
+            if (!isIOS && !isAndroid) {
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000); // 1000 ms = 1 segundo
+            }
         });
 
         // --- Botones de cierre para modales ---
