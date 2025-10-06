@@ -184,8 +184,13 @@
             }
         });
 
+        // --- Redirección solo en PC ---
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
+
+            if (!isIOS && !isAndroid) {
+                window.location.href = 'index.html';
+            }
         });
 
         // --- Botones de cierre para modales ---
