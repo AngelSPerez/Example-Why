@@ -1,6 +1,6 @@
 {
     "name": "WhyAI",
-    "short_name": "WhyStore",
+    "short_name": "WhyAI",
     "description": "Excelente IA generativa.",
     "start_url": "index.html",
     "display": "standalone",
@@ -21,4 +21,5 @@
         "purpose": "any maskable"
       }
     ]
+
   }
