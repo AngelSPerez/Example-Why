@@ -1,12 +1,12 @@
   {
-    "name": "Digital Piano",
-    "short_name": "Digital Piano",
-    "description": "Toca el piano digital en línea. con compatibilidad con teclado.",
-    "start_url": "./index.html",
+    "name": "Flappy Bird",
+    "short_name": "Flappy Bird",
+    "description": "simple game",
+    "start_url": "/index.html",
     "display": "standalone",
     "background_color": "#181818",
     "theme_color": "#181818",
-    "orientation": "any",
+    "orientation": "portrait-primary",
     "icons": [
       {
         "src": "images/icons/icon192.png",
