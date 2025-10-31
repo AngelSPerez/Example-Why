@@ -242,8 +242,15 @@ function main(){
 	 canvas.width=width;
 	 canvas.height=height;
 	 
-     // Calcular y almacenar el factor de escala global para llenar la altura
-     scale = window.innerHeight / height;
+     // --- INICIO DE LA MODIFICACIÓN ---
+     // Calcular los factores de escala para ancho y alto
+     var scaleX = window.innerWidth / width;
+     var scaleY = window.innerHeight / height;
+     
+     // Usar el factor de escala MÁS PEQUEÑO para asegurar que todo el juego quepa
+     // (Esto mantiene la relación de aspecto y evita que se corte la imagen)
+     scale = Math.min(scaleX, scaleY);
+     // --- FIN DE LA MODIFICACIÓN ---
 
      // Establecer el tamaño de *estilo* del canvas a sus dimensiones base
      // El transform se encargará del escalado visual
