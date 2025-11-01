@@ -1,19 +1,24 @@
 {
   "short_name": "Fireboy & Watergirl",
   "name": "Fireboy & Watergirl: Elements",
+  "description": "a game two players",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "background_color": "#181818",
+  "theme_color": "#181818",
+  "orientation": "landscape",
   "icons": [
     {
       "src": "icon-60x60.png",
+      "sizes": "60x60",
       "type": "image/png",
-      "sizes": "60x60"
+      "purpose": "any maskable"
     },
     {
       "src": "logo-512px.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": "/index.html",
-  "display": "fullscreen",
-  "orientation": "landscape"
+  ]
 }
