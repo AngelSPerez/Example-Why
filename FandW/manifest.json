@@ -10,7 +10,7 @@
     {
       "src": "img.gamedistribution.com/gamedistributionid-512x512.jpeg",
       "type": "image/png",
-      "sizes": "120x120"
+      "sizes": "512x512"
     }
   ],
   "start_url": "/index.html",
