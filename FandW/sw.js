@@ -1,4 +1,4 @@
-const CACHE_NAME = "road-v1-cache";
+const CACHE_NAME = "fire-v1-cache";
 
 const STATIC_ASSETS = [
   "index.html",
@@ -142,4 +142,5 @@ self.addEventListener("fetch", (event) => {
       });
     })
   );
+
 });
