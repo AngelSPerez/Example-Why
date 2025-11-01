@@ -5,9 +5,11 @@ const STATIC_ASSETS = [
   "game.json",
   "icon-60x60.png",
   "index.html",
+  "install.html",
+  "logo-512px.jpeg",
+  "logo-512px.png",
   "main.min.js",
   "manifest.json",
-  "sw.js",
   "version.js",
   "assets/atlasses/CharAssets.json",
   "assets/atlasses/CharAssets.png",
@@ -109,7 +111,7 @@ const STATIC_ASSETS = [
   "data/forest/levels/forest_31.json",
   "data/forest/levels/forest_32.json",
   "data/tutorials/levels/forest_01.json",
-  "img.gamedistribution.com/logo-512px.jpeg",
+  "img.gamedistribution.com/gamedistributionid-512x512.jpeg",
 ];
 
 // ---------------------------
@@ -176,4 +178,5 @@ self.addEventListener("fetch", (event) => {
   );
 
 });
+
 
