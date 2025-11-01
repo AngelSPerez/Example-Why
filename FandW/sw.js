@@ -1,5 +1,9 @@
-const CACHE_NAME = "fire-v2-cache";
+// ¡MUY IMPORTANTE! Sube la versión para forzar la actualización
+const CACHE_NAME = "fire-v3-cache";
 
+// Esta es tu lista de archivos.
+// Si la instalación sigue fallando, es porque UN archivo de esta lista tiene
+// un nombre o ruta incorrecta (revisa la consola F12 para ver el error 404).
 const STATIC_ASSETS = [
   "fireboy-and-watergirl-forest-temple.min.js",
   "game.json",
@@ -118,10 +122,22 @@ const STATIC_ASSETS = [
 // Instalación
 // ---------------------------
 self.addEventListener("install", (event) => {
+  console.log(`SW (${CACHE_NAME}): Evento install`);
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS))
-      .then(() => self.skipWaiting())
+      .then(cache => {
+        console.log(`SW (${CACHE_NAME}): Cacheando ${STATIC_ASSETS.length} archivos...`);
+        // Si esto falla, revisa la consola para ver qué archivo dio error
+        return cache.addAll(STATIC_ASSETS);
+      })
+      .then(() => {
+        console.log(`SW (${CACHE_NAME}): ¡Archivos cacheados! Activando (skipWaiting)...`);
+        return self.skipWaiting();
+      })
+      .catch(err => {
+        console.error(`SW (${CACHE_NAME}): ¡FALLÓ cache.addAll()!`, err);
+        console.error("SW: Revisa el error 404 de arriba. Ese archivo tiene un nombre o ruta incorrecta en la lista STATIC_ASSETS.");
+      })
   );
 });
 
@@ -129,13 +145,22 @@ self.addEventListener("install", (event) => {
 // Activación y limpieza de caches antiguos
 // ---------------------------
 self.addEventListener("activate", (event) => {
+  console.log(`SW (${CACHE_NAME}): Evento activate`);
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        // Se elimina la referencia a API_CACHE, solo se conserva el caché principal
-        keys.map(key => (key !== CACHE_NAME) ? caches.delete(key) : null)
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log(`SW (${CACHE_NAME}): Eliminando caché antiguo: ${key}`);
+            return caches.delete(key);
+          }
+          return null;
+        })
       )
-    ).then(() => self.clients.claim())
+    ).then(() => {
+      console.log(`SW (${CACHE_NAME}): Clientes reclamados.`);
+      return self.clients.claim();
+    })
   );
 });
 
@@ -149,14 +174,25 @@ self.addEventListener("fetch", (event) => {
   // HTML navegación (modo offline)
   // ---------------------------
   if (request.mode === "navigate") {
+    console.log(`SW: [Navigate] Buscando: ${request.url}`);
     event.respondWith(
-      fetch(request)
-        .catch(() => caches.match(request)
-          .then(cachedResp => {
-            // Si la página específica no está, devuelve 'index.html' como fallback
-            return cachedResp || caches.match('index.html'); 
-          })
-        )
+      fetch(request) // 1. Intenta ir a la red
+        .catch(() => {
+          console.log(`SW: [Navigate] Red falló. Buscando en caché: ${request.url}`);
+          // 2. Si falla, busca en caché (ignorando "?v=123")
+          // CORREGIDO: Añadido { ignoreSearch: true }
+          return caches.match(request, { ignoreSearch: true })
+            .then(cachedResp => {
+              if (cachedResp) {
+                console.log(`SW: [Navigate] Sirviendo desde caché: ${request.url}`);
+                return cachedResp;
+              }
+              // 3. Si no está, devuelve 'index.html' como última opción
+              console.log(`SW: [Navigate] No se encontró. Devolviendo 'index.html'`);
+              // CORREGIDO: Añadido { ignoreSearch: true }
+              return caches.match('index.html', { ignoreSearch: true });
+            });
+        })
     );
     return;
   }
@@ -165,18 +201,38 @@ self.addEventListener("fetch", (event) => {
   // Recursos estáticos: cache-first
   // ---------------------------
   event.respondWith(
-    caches.match(request).then(cachedResp => {
-      // 1. Devuelve desde el caché si existe
-      return cachedResp || fetch(request).then(networkResponse => {
-        // 2. Si no está en caché, lo busca en la red y lo guarda
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(request, networkResponse.clone());
-          return networkResponse;
+    // 1. Busca en caché (ignorando "?v=123")
+    // CORREGIDO: Añadido { ignoreSearch: true }
+    caches.match(request, { ignoreSearch: true }).then(cachedResp => {
+      
+      // 1.1 Si está en caché, lo devuelve
+      if (cachedResp) {
+        // Descomenta la siguiente línea si quieres ver CADA archivo que se sirve:
+        // console.log(`SW: [Static] Sirviendo desde caché: ${request.url}`);
+        return cachedResp;
+      }
+
+      // 2. Si no está en caché, lo busca en la red
+      console.log(`SW: [Static] Cache miss. Buscando en red: ${request.url}`);
+      return fetch(request).then(networkResponse => {
+        
+        // 2.1 Clona la respuesta para poder guardarla Y devolverla
+        const responseToCache = networkResponse.clone();
+        
+        // CORREGIDO: "op en" -> "open"
+        caches.open(CACHE_NAME).then(cache => {
+          console.log(`SW: [Static] Guardando en caché nuevo recurso: ${request.url}`);
+          cache.put(request, responseToCache);
         });
+        
+        // 2.2 Devuelve la respuesta original de la red
+        return networkResponse;
+        
+      }).catch(err => {
+          console.warn(`SW: [Static] Fallo de red buscando: ${request.url}`, err);
+          // Opcional: devolver una respuesta de fallback para imágenes/audio si falla
       });
     })
   );
 
 });
-
-
