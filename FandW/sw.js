@@ -1,17 +1,14 @@
-const CACHE_NAME = "fire-v1-cache";
+const CACHE_NAME = "fire-v2-cache";
 
 const STATIC_ASSETS = [
-  "index.html",
-  "version.js",
-  "sw.js",
-  "manifest.json",
-  "main.min.js",
-  "icon-60x60.png",
+  "fireboy-and-watergirl-forest-temple.min.js",
   "game.json",
-  "img.gamedistribution.com/gamedistributionid-512x512.jpeg",
-  "data/forest/levels/temple.json",
-  "data/tutorials/levels/forest_01.json",
-  "bower_components/requirejs/require.js",
+  "icon-60x60.png",
+  "index.html",
+  "main.min.js",
+  "manifest.json",
+  "sw.js",
+  "version.js",
   "assets/atlasses/CharAssets.json",
   "assets/atlasses/CharAssets.png",
   "assets/atlasses/GroundAssets.json",
@@ -78,6 +75,41 @@ const STATIC_ASSETS = [
   "assets/tilemaps/tilesets/Ground.json",
   "assets/tilemaps/tilesets/LargeObjects.json",
   "assets/tilemaps/tilesets/Objects.json",
+  "bower_components/requirejs/require.js",
+  "data/forest/temple.json",
+  "data/forest/levels/forest_02.json",
+  "data/forest/levels/forest_03.json",
+  "data/forest/levels/forest_04.json",
+  "data/forest/levels/forest_05.json",
+  "data/forest/levels/forest_06.json",
+  "data/forest/levels/forest_07.json",
+  "data/forest/levels/forest_08.json",
+  "data/forest/levels/forest_09.json",
+  "data/forest/levels/forest_10.json",
+  "data/forest/levels/forest_11.json",
+  "data/forest/levels/forest_12.json",
+  "data/forest/levels/forest_13.json",
+  "data/forest/levels/forest_14.json",
+  "data/forest/levels/forest_15.json",
+  "data/forest/levels/forest_16.json",
+  "data/forest/levels/forest_17.json",
+  "data/forest/levels/forest_18.json",
+  "data/forest/levels/forest_19.json",
+  "data/forest/levels/forest_20.json",
+  "data/forest/levels/forest_21.json",
+  "data/forest/levels/forest_22.json",
+  "data/forest/levels/forest_23.json",
+  "data/forest/levels/forest_24.json",
+  "data/forest/levels/forest_25.json",
+  "data/forest/levels/forest_26.json",
+  "data/forest/levels/forest_27.json",
+  "data/forest/levels/forest_28.json",
+  "data/forest/levels/forest_29.json",
+  "data/forest/levels/forest_30.json",
+  "data/forest/levels/forest_31.json",
+  "data/forest/levels/forest_32.json",
+  "data/tutorials/levels/forest_01.json",
+  "img.gamedistribution.com/logo-512px.jpeg",
 ];
 
 // ---------------------------
@@ -144,3 +176,4 @@ self.addEventListener("fetch", (event) => {
   );
 
 });
+
