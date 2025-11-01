@@ -8,8 +8,8 @@
       "sizes": "60x60"
     },
     {
-      "src": "logo-512px.jpeg",
-      "type": "image/jpeg",
+      "src": "logo-512px.png",
+      "type": "image/png",
       "sizes": "512x512"
     }
   ],
