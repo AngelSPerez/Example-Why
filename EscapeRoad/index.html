@@ -3,19 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no">
-  <title>Escape Road Game| @coding.stella</title>
+
+  <!-- Viewport optimizado -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+  <!-- Compatibilidad iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <meta name="apple-mobile-web-app-orientation" content="any">
+
+  <title>Escape Road Game | @coding.stella</title>
 
   <link rel="shortcut icon" href="icon.png">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/abisdbest/classroom.google.com@85146ac051b67a3c32ebdf898bb0144d818d580b/drive.google.com/escape%20road/TemplateData/style.css">
   <link rel="manifest" href="manifest.json">
 
+  <!-- Recomendado para evitar parpadeos o marcos en iOS -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background-color: #000;
+      overflow: hidden;
+    }
+
+    @supports (padding: env(safe-area-inset-top)) {
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+    }
+
+    canvas, #unity-container, #gameContainer {
+      width: 100vw !important;
+      height: 100vh !important;
+      display: block;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+
   <script id="gmsoft-jssdk" src=""></script>
   <script src="//www.google.com/jsapi"></script>
   <script>
-    window.parent.maeExportApis_();
+    window.parent.maeExportApis_ && window.parent.maeExportApis_();
   </script>
-
 </head>
 
 <body class="dark">
