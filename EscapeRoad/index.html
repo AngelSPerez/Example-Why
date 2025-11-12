@@ -46,6 +46,40 @@
       margin: 0;
       padding: 0;
     }
+
+    /* 🔥 Fuerza pantalla completa incluso debajo del notch */
+    @supports (padding: env(safe-area-inset-top)) {
+      body {
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        inset: 0; /* top, right, bottom, left a 0 */
+        height: 100vh;
+        width: 100vw;
+        background-color: #000;
+      }
+
+  /* Si tu juego usa un contenedor o canvas */
+      canvas, #unity-container, #gameContainer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0;
+        padding: 0;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: #000;
+      }
+
+  /* Esta línea hace que ignore los márgenes del notch */
+    html, body {
+      padding: constant(safe-area-inset); /* soporte antiguo */
+      padding: env(safe-area-inset);
+    }
+  }
+
   </style>
 
   <script id="gmsoft-jssdk" src=""></script>
