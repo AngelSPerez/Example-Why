@@ -79,39 +79,6 @@
       padding: env(safe-area-inset);
     }
   }
-
-    /* 💀 Elimina o disimula el borde superior del status bar */
-  @supports (padding: env(safe-area-inset-top)) {
-    html, body {
-      background-color: #000; /* o el color del fondo de tu juego */
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-    }
-  
-    body {
-      position: fixed;
-      inset: 0;
-      height: 100vh;
-      width: 100vw;
-    }
-  
-    /* Fuerza que el contenido se expanda bajo la barra */
-    #gameContainer, canvas, #unity-container {
-      position: fixed;
-      top: calc(-1 * env(safe-area-inset-top));
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100vw;
-      height: calc(100vh + env(safe-area-inset-top));
-      display: block;
-      background-color: #000;
-    }
-  }
-
   </style>
 
   <script id="gmsoft-jssdk" src=""></script>
