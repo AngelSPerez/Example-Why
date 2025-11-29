@@ -105,13 +105,28 @@
         </div>
     </div>
 
-    <div id="pwa-modal-ios" class="modal-overlay">
+    <div id="pwa-modal-iphone" class="modal-overlay">
         <div class="modal-content">
-            <h2>Instalar en iPhone / iPad</h2>
+            <h2>Instalar en iPhone</h2>
             <p>Sigue estos pasos para instalar la WhyApp:</p>
             <div class="step">
                 <span class="step-number">1</span>
                 <span>Toca el botón <b>Compartir 📤</b></span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span>Selecciona "<b>Añadir a inicio</b>".</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="pwa-modal-ipad" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Instalar en iPad</h2>
+            <p>Sigue estos pasos para instalar la WhyApp:</p>
+            <div class="step">
+                <span class="step-number">1</span>
+                <span>Toca el botón <b>Compartir 📤</b> en la barra de Safari.</span>
             </div>
             <div class="step">
                 <span class="step-number">2</span>
@@ -140,31 +155,69 @@
         const statusText = document.getElementById('status-text');
         const instructions = document.querySelector('.instructions');
         const modalAndroid = document.getElementById('pwa-modal-android');
-        const modalIOS = document.getElementById('pwa-modal-ios');
+        
+        // IDs actualizados para los nuevos modales
+        const modalIPhone = document.getElementById('pwa-modal-iphone');
+        const modalIPad = document.getElementById('pwa-modal-ipad');
 
         let deferredPrompt;
 
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        const isIOS = /iPhone|iPad|iPod/i.test(ua);
-        const isAndroid = /Android/i.test(ua);
+        // --- DETECCIÓN DE INSTALACIÓN ---
+        let isInstalled = false;
+        // Comprueba el modo de visualización estándar y el booleano 'standalone' de iOS
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            isInstalled = true;
+            
+            // Obtiene el nombre de la app desde el H1
+            const appName = document.querySelector('.install-card h1').textContent.trim() || 'La App';
+            
+            // Muestra la alerta solicitada
+            alert(appName + " ya está instalado.");
+            
+            // Oculta la UI de instalación
+            document.querySelector('.card-container').style.display = 'none';
+            installPromptDiv.style.display = 'none';
+        }
+        // --- FIN DETECCIÓN ---
 
-        // Mostrar según plataforma
-        if (isIOS) {
-            modalIOS.style.display = 'flex';
-            instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iOS.';
-        } else if (isAndroid) {
-            modalAndroid.style.display = 'flex';
-        } else {
-            installPromptDiv.style.display = 'flex';
-            instructions.textContent = 'Haz clic en el botón "Instalar" para añadir la aplicación a tu dispositivo.';
+        // Detección de User Agent actualizada
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /Android/i.test(ua);
+        
+        // Detección específica para iPad (incluye iPadOS 13+ que se reporta como Mac)
+        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        
+        // Detección de iPhone (asegurándose que no sea un iPad)
+        const isIPhone = /iPhone/i.test(ua) && !isIPad;
+
+        // Mostrar según plataforma (Solo si NO está instalada)
+        if (!isInstalled) {
+            if (isIPhone) {
+                modalIPhone.style.display = 'flex';
+                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPhone.';
+            } else if (isIPad) {
+                modalIPad.style.display = 'flex';
+                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
+            } else if (isAndroid) {
+                modalAndroid.style.display = 'flex';
+            } else {
+                // Para Desktop
+                installPromptDiv.style.display = 'flex';
+                instructions.textContent = 'Haz clic en el botón "Instalar" para añadir la aplicación a tu dispositivo.';
+            }
         }
 
-        // Android PWA
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installPromptDiv.style.display = 'flex';
-        });
+        // Android PWA (Solo si NO está instalada)
+        if (!isInstalled) {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // Solo muestra el prompt si no es iOS o Android (es decir, desktop)
+                if (!isIPhone && !isIPad && !isAndroid) {
+                    installPromptDiv.style.display = 'flex';
+                }
+            });
+        }
 
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
@@ -188,7 +241,8 @@
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
 
-            if (!isIOS && !isAndroid) {
+            // Usamos la detección actualizada
+            if (!isIPhone && !isIPad && !isAndroid) {
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000); // 1000 ms = 1 segundo
@@ -211,8 +265,14 @@
             modal.querySelector('.modal-content').appendChild(btn);
         }
 
-        createCloseButton(modalAndroid);
-        createCloseButton(modalIOS);
+        // Solo crea el botón de cierre para Android y si no está instalada
+        if (!isInstalled) {
+            createCloseButton(modalAndroid);
+        }
+        
+        // NO llamamos a createCloseButton para modalIPhone o modalIPad
+        // según la solicitud de quitar la "X".
+
     </script>
 </body>
 </html>
