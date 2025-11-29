@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instalador de WhyStore</title>
+    <title>Instalador de Tldraw</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
@@ -105,9 +105,10 @@
         </div>
     </div>
 
-    <div id="pwa-modal-ios" class="modal-overlay">
+    <!-- Modales separados para iPhone y iPad -->
+    <div id="pwa-modal-iphone" class="modal-overlay">
         <div class="modal-content">
-            <h2>Instalar en iPhone / iPad</h2>
+            <h2>Instalar en iPhone</h2>
             <p>Sigue estos pasos para instalar la WhyApp:</p>
             <div class="step">
                 <span class="step-number">1</span>
@@ -120,6 +121,41 @@
         </div>
     </div>
 
+    <div id="pwa-modal-ipad" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Instalar en iPad</h2>
+            <p>Sigue estos pasos para instalar la WhyApp:</p>
+            <div class="step">
+                <span class="step-number">1</span>
+                <span>Toca el <b>icono de Safari 🧭</b></span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span>Toca el botón <b>Compartir 📤</b></span>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <span>Selecciona "<b>Añadir a inicio</b>".</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para fallback de instalación (reemplaza alert) -->
+    <div id="fallback-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Instrucciones de Instalación</h2>
+            <p>Para instalar la aplicación:</p>
+            <div class="step" style="align-items: baseline;">
+                <span style="margin-right: 8px;">•</span>
+                <span><b>Chrome/Edge</b>: usa el icono "+" en la barra de direcciones o el menú "Instalar".</span>
+            </div>
+            <div class="step" style="align-items: baseline;">
+                <span style="margin-right: 8px;">•</span>
+                <span><b>Safari</b>: abre el menú "Compartir" y elige "Añadir a inicio".</span>
+            </div>
+        </div>
+    </div>
+
     <div id="install-prompt">
         <span>Instala la aplicación para un acceso rápido</span>
         <button id="install-button">Instalar</button>
@@ -127,7 +163,8 @@
 
     <main class="card-container">
         <div class="install-card">
-            <img src="images/icons/icon192.png" alt="Logo de Online Sequencer" class="app-icon">
+            <!-- Contenido del nuevo archivo -->
+            <img src="images/icons/icon192.png" alt="Logo de Tldraw" class="app-icon">
             <h1>Tldraw</h1>
             <h2 id="status-text"><span>Listo para instalar</span></h2>
             <p class="instructions">Haz clic en el botón <strong>Instalar</strong> que aparece en la notificación superior para añadir la aplicación a tu dispositivo.</p>
@@ -140,31 +177,67 @@
         const statusText = document.getElementById('status-text');
         const instructions = document.querySelector('.instructions');
         const modalAndroid = document.getElementById('pwa-modal-android');
-        const modalIOS = document.getElementById('pwa-modal-ios');
+        
+        // IDs actualizados para los nuevos modales
+        const modalIPhone = document.getElementById('pwa-modal-iphone');
+        const modalIPad = document.getElementById('pwa-modal-ipad');
+        const modalFallback = document.getElementById('fallback-modal');
 
         let deferredPrompt;
 
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        const isIOS = /iPhone|iPad|iPod/i.test(ua);
-        const isAndroid = /Android/i.test(ua);
+        // --- DETECCIÓN DE INSTALACIÓN ---
+        let isInstalled = false;
+        // Comprueba el modo de visualización estándar y el booleano 'standalone' de iOS
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            isInstalled = true;
+            
+            // Muestra estado de instalación en lugar de alert
+            statusText.innerHTML = '<span>Ya está instalado</span>';
+            instructions.textContent = 'Puedes cerrar esta pestaña y abrir la aplicación desde tu pantalla de inicio.';
 
-        // Mostrar según plataforma
-        if (isIOS) {
-            modalIOS.style.display = 'flex';
-            instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iOS.';
-        } else if (isAndroid) {
-            modalAndroid.style.display = 'flex';
-        } else {
-            installPromptDiv.style.display = 'flex';
-            instructions.textContent = 'Haz clic en el botón "Instalar" para añadir la aplicación a tu dispositivo.';
+            // Oculta el prompt de instalación de escritorio
+            installPromptDiv.style.display = 'none';
+        }
+        // --- FIN DETECCIÓN ---
+
+        // Detección de User Agent actualizada
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /Android/i.test(ua);
+        
+        // Detección específica para iPad (incluye iPadOS 13+ que se reporta como Mac)
+        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        
+        // Detección de iPhone (asegurándose que no sea un iPad)
+        const isIPhone = /iPhone/i.test(ua) && !isIPad;
+
+        // Mostrar según plataforma (Solo si NO está instalada)
+        if (!isInstalled) {
+            if (isIPhone) {
+                modalIPhone.style.display = 'flex';
+                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPhone.';
+            } else if (isIPad) {
+                modalIPad.style.display = 'flex';
+                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
+            } else if (isAndroid) {
+                modalAndroid.style.display = 'flex';
+            } else {
+                // Para Desktop
+                installPromptDiv.style.display = 'flex';
+                instructions.textContent = 'Haz clic en el botón "Instalar" para añadir la aplicación a tu dispositivo.';
+            }
         }
 
-        // Android PWA
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installPromptDiv.style.display = 'flex';
-        });
+        // Android PWA (Solo si NO está instalada)
+        if (!isInstalled) {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // Solo muestra el prompt si no es iOS o Android (es decir, desktop)
+                if (!isIPhone && !isIPad && !isAndroid) {
+                    installPromptDiv.style.display = 'flex';
+                }
+            });
+        }
 
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
@@ -180,7 +253,8 @@
                 }
                 deferredPrompt = null;
             } else {
-                alert('Para instalar la aplicación:\n- Chrome/Edge: usa el icono "+" en la barra de direcciones o el menú "Instalar".\n- Safari: abre el menú "Compartir" y elige "Añadir a inicio".');
+                // Muestra el modal de fallback en lugar de un alert
+                modalFallback.style.display = 'flex';
             }
         });
 
@@ -188,7 +262,8 @@
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
 
-            if (!isIOS && !isAndroid) {
+            // Usamos la detección actualizada
+            if (!isIPhone && !isIPad && !isAndroid) {
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000); // 1000 ms = 1 segundo
@@ -211,8 +286,14 @@
             modal.querySelector('.modal-content').appendChild(btn);
         }
 
-        createCloseButton(modalAndroid);
-        createCloseButton(modalIOS);
+        // Solo crea el botón de cierre para Android y Fallback (si no está instalada)
+        if (!isInstalled) {
+            createCloseButton(modalAndroid);
+            createCloseButton(modalFallback);
+        }
+        
+        // NO llamamos a createCloseButton para modalIPhone o modalIPad
+
     </script>
 </body>
 </html>
