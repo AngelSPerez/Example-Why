@@ -175,50 +175,37 @@
         // Bandera para saber si el navegador soporta el prompt PWA
         let supportsPWA = false;
 
-        // --- DETECCIÓN DE INSTALACIÓN SOLO PARA ANDROID Y DESKTOP ---
+        // Bandera de instalación (ya no se usa para ocultar contenido)
         let isInstalled = false;
-        
-        // Solo ocultamos el contenido si NO es iPhone/iPad
-        if (!isIPhone && !isIPad) {
-            if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-                isInstalled = true;
-                // Oculta la UI de instalación solo para Android/Desktop
-                document.querySelector('.card-container').style.display = 'none';
-                installPromptDiv.style.display = 'none';
+
+        // PWA Prompt (Para Android y Desktop)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            supportsPWA = true;
+
+            // Muestra el botón azul en Android y Desktop si el prompt se dispara
+            installPromptDiv.style.display = 'flex';
+            
+            // Si el prompt se dispara en Android, ocultamos el modal de instrucciones manuales
+            if (isAndroid) {
+                modalAndroid.style.display = 'none';
             }
-        }
-        // --- FIN DETECCIÓN ---
-
-        // PWA Prompt (Solo para Android y Desktop)
-        if (!isInstalled) {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                supportsPWA = true;
-
-                // Muestra el botón azul en Android y Desktop si el prompt se dispara
-                installPromptDiv.style.display = 'flex';
-                
-                // Si el prompt se dispara en Android, ocultamos el modal de instrucciones manuales
-                if (isAndroid) {
-                    modalAndroid.style.display = 'none';
-                }
-            });
-        }
+        });
 
         // Mostrar modales de instrucciones para iOS/Android al cargar
         if (isIPhone) {
-            // SIEMPRE mostrar modal en iPhone, sin importar el modo standalone
+            // SIEMPRE mostrar modal en iPhone
             modalIPhone.style.display = 'flex';
             instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPhone.';
         } else if (isIPad) {
             // SIEMPRE mostrar modal en iPad
             modalIPad.style.display = 'flex';
             instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
-        } else if (isAndroid && !supportsPWA && !isInstalled) { 
-            // Solo mostrar modal Android si no está instalado y no hay prompt
+        } else if (isAndroid && !supportsPWA) { 
+            // Solo mostrar modal Android si no hay prompt
             modalAndroid.style.display = 'flex';
-        } else if (!supportsPWA && !isInstalled) { 
+        } else if (!supportsPWA) { 
             // Desktop sin prompt PWA
             installPromptDiv.style.display = 'none';
         }
@@ -274,8 +261,8 @@
             modal.querySelector('.modal-content').appendChild(btn);
         }
 
-        // Solo botón de cierre para Android
-        if (!isInstalled && isAndroid) {
+        // Botón de cierre solo para Android
+        if (isAndroid) {
             createCloseButton(modalAndroid);
         }
 
