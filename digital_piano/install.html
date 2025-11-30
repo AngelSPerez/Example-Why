@@ -105,7 +105,6 @@
         </div>
     </div>
 
-    <!-- Modales separados para iPhone y iPad (de la lógica del primer archivo) -->
     <div id="pwa-modal-iphone" class="modal-overlay">
         <div class="modal-content">
             <h2>Instalar en iPhone</h2>
@@ -147,7 +146,6 @@
 
     <main class="card-container">
         <div class="install-card">
-            <!-- Contenido del nuevo archivo -->
             <img src="images/icons/icon192.png" alt="Logo de Online Sequencer" class="app-icon">
             <h1>Digital Piano</h1>
             <h2 id="status-text"><span>Listo para instalar</span></h2>
@@ -168,17 +166,21 @@
 
         let deferredPrompt;
 
-        // --- DETECCIÓN DE INSTALACIÓN (del primer archivo) ---
+        // Detección de User Agent
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /Android/i.test(ua);
+        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isIPhone = /iPhone/i.test(ua) && !isIPad;
+        const isMobile = isAndroid || isIPhone || isIPad;
+        const isDesktop = !isMobile; // Definimos isDesktop para usar en la lógica de alerta
+
+        // --- DETECCIÓN DE INSTALACIÓN ---
         let isInstalled = false;
         // Comprueba el modo de visualización estándar y el booleano 'standalone' de iOS
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             isInstalled = true;
             
-            // Obtiene el nombre de la app desde el H1
-            const appName = document.querySelector('.install-card h1').textContent.trim() || 'La App';
-            
-            // Muestra la alerta solicitada
-            alert(appName + " ya está instalado.");
+            // *** MODIFICACIÓN: Se eliminó la alerta automática al cargar la página ***
             
             // Oculta la UI de instalación
             document.querySelector('.card-container').style.display = 'none';
@@ -186,17 +188,7 @@
         }
         // --- FIN DETECCIÓN ---
 
-        // Detección de User Agent actualizada (del primer archivo)
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        const isAndroid = /Android/i.test(ua);
-        
-        // Detección específica para iPad (incluye iPadOS 13+ que se reporta como Mac)
-        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        
-        // Detección de iPhone (asegurándose que no sea un iPad)
-        const isIPhone = /iPhone/i.test(ua) && !isIPad;
-
-        // Mostrar según plataforma (Solo si NO está instalada) (lógica del primer archivo)
+        // Mostrar según plataforma (Solo si NO está instalada)
         if (!isInstalled) {
             if (isIPhone) {
                 modalIPhone.style.display = 'flex';
@@ -213,13 +205,13 @@
             }
         }
 
-        // Android PWA (Solo si NO está instalada) (lógica del primer archivo)
+        // Android PWA (Solo si NO está instalada)
         if (!isInstalled) {
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                // Solo muestra el prompt si no es iOS o Android (es decir, desktop)
-                if (!isIPhone && !isIPad && !isAndroid) {
+                // Solo muestra el prompt si es Desktop
+                if (isDesktop) {
                     installPromptDiv.style.display = 'flex';
                 }
             });
@@ -239,17 +231,19 @@
                 }
                 deferredPrompt = null;
             } else {
-                // Se mantiene el alert genérico del segundo archivo como fallback
-                alert('Para instalar la aplicación:\n- Chrome/Edge: usa el icono "+" en la barra de direcciones o el menú "Instalar".\n- Safari: abre el menú "Compartir" y elige "Añadir a inicio".');
+                // *** ALERTA: Solo se activa al hacer clic, si NO hay prompt, y es Desktop. ***
+                if (isDesktop) {
+                    alert('La aplicación ya se encuentra instalada o no se puede instalar.');
+                }
             }
         });
 
-        // --- Redirección solo en PC --- (lógica del primer archivo)
+        // --- Redirección solo en PC ---
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
 
-            // Usamos la detección actualizada
-            if (!isIPhone && !isIPad && !isAndroid) {
+            // Redirección solo si es Desktop
+            if (isDesktop) {
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000); // 1000 ms = 1 segundo
@@ -272,7 +266,7 @@
             modal.querySelector('.modal-content').appendChild(btn);
         }
 
-        // Solo crea el botón de cierre para Android y si no está instalada (lógica del primer archivo)
+        // Solo crea el botón de cierre para Android y si no está instalada
         if (!isInstalled) {
             createCloseButton(modalAndroid);
         }
