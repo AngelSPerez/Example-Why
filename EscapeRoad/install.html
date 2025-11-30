@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instalador de WhyStore</title>
-    
+
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
@@ -85,7 +85,7 @@
     </style>
 </head>
 <body>
-    
+
     <div id="pwa-modal-android" class="modal-overlay">
         <div class="modal-content">
             <h2>Últimos pasos en Android</h2>
@@ -159,40 +159,40 @@
         const statusText = document.getElementById('status-text');
         const instructions = document.querySelector('.instructions');
         const modalAndroid = document.getElementById('pwa-modal-android');
-        
+
         // IDs actualizados para los nuevos modales
         const modalIPhone = document.getElementById('pwa-modal-iphone');
         const modalIPad = document.getElementById('pwa-modal-ipad');
 
         let deferredPrompt;
 
+        // Detección de User Agent actualizada
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /Android/i.test(ua);
+        // Detección específica para iPad (incluye iPadOS 13+ que se reporta como Mac)
+        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        // Detección de iPhone (asegurándose que no sea un iPad)
+        const isIPhone = /iPhone/i.test(ua) && !isIPad;
+        // Nueva variable para determinar si es un dispositivo móvil
+        const isMobile = isAndroid || isIPhone || isIPad;
+        // Nueva variable para determinar si es un computador
+        const isDesktop = !isMobile;
+
         // --- DETECCIÓN DE INSTALACIÓN ---
         let isInstalled = false;
         // Comprueba el modo de visualización estándar y el booleano 'standalone' de iOS
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             isInstalled = true;
-            
-            // Obtiene el nombre de la app desde el H1
-            const appName = document.querySelector('.install-card h1').textContent.trim() || 'La App';
-            
-            // Muestra la alerta solicitada
-            alert(appName + " ya está instalado.");
-            
-            // Oculta la UI de instalación
+
+            /* * Se eliminó la alerta automática al cargar la página,
+             * de acuerdo con la solicitud de solo activarla al hacer clic.
+             */
+
+            // Oculta la UI de instalación para todos si ya está instalada
             document.querySelector('.card-container').style.display = 'none';
             installPromptDiv.style.display = 'none';
         }
         // --- FIN DETECCIÓN ---
-
-        // Detección de User Agent actualizada
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        const isAndroid = /Android/i.test(ua);
-        
-        // Detección específica para iPad (incluye iPadOS 13+ que se reporta como Mac)
-        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        
-        // Detección de iPhone (asegurándose que no sea un iPad)
-        const isIPhone = /iPhone/i.test(ua) && !isIPad;
 
         // Mostrar según plataforma (Solo si NO está instalada)
         if (!isInstalled) {
@@ -201,7 +201,7 @@
                 instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPhone.';
             } else if (isIPad) {
                 modalIPad.style.display = 'flex';
-                instructions.textContent = 'Sigue lasGira las instrucciones en pantalla para instalar en iPad.';
+                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
             } else if (isAndroid) {
                 modalAndroid.style.display = 'flex';
             } else {
@@ -216,8 +216,8 @@
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                // Solo muestra el prompt si no es iOS o Android (es decir, desktop)
-                if (!isIPhone && !isIPad && !isAndroid) {
+                // Solo muestra el prompt si es Desktop
+                if (isDesktop) {
                     installPromptDiv.style.display = 'flex';
                 }
             });
@@ -225,6 +225,7 @@
 
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
+                // Lógica normal de instalación de PWA (Desktop)
                 installPromptDiv.style.display = 'none';
                 statusText.innerHTML = `<div class="loader"></div><span>Instalando...</span>`;
                 instructions.style.display = 'none';
@@ -237,7 +238,10 @@
                 }
                 deferredPrompt = null;
             } else {
-                alert('La aplicacion ya se encuentra instalada o no se puede instalar.');
+                // *** ALERTA: Solo al hacer clic, si NO hay prompt, y es Desktop. ***
+                if (isDesktop) {
+                    alert('La aplicación ya se encuentra instalada o no se puede instalar.');
+                }
             }
         });
 
@@ -245,8 +249,8 @@
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
 
-            // Usamos la detección actualizada
-            if (!isIPhone && !isIPad && !isAndroid) {
+            // Usamos la detección actualizada (Solo si es Desktop)
+            if (isDesktop) {
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000); // 1000 ms = 1 segundo
@@ -273,9 +277,8 @@
         if (!isInstalled) {
             createCloseButton(modalAndroid);
         }
-        
-        // NO llamamos a createCloseButton para modalIPhone o modalIPad
-        // según la solicitud de quitar la "X".
+
+        // Los modales de iPhone/iPad no tienen botón de cierre según la solicitud previa.
 
     </script>
 </body>
