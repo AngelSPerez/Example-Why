@@ -175,9 +175,6 @@
         // Bandera para saber si el navegador soporta el prompt PWA
         let supportsPWA = false;
 
-        // Bandera de instalación (ya no se usa para ocultar contenido)
-        let isInstalled = false;
-
         // PWA Prompt (Para Android y Desktop)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
