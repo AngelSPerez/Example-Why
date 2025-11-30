@@ -166,7 +166,7 @@
 
         let deferredPrompt;
 
-        // Detección de User Agent actualizada
+        // Detección de User Agent
         const ua = navigator.userAgent || navigator.vendor || window.opera;
         const isAndroid = /Android/i.test(ua);
         // Detección específica para iPad (incluye iPadOS 13+ que se reporta como Mac)
@@ -177,6 +177,9 @@
         const isMobile = isAndroid || isIPhone || isIPad;
         // Nueva variable para determinar si es un computador
         const isDesktop = !isMobile;
+        
+        // Bandera para saber si el navegador soporta el prompt PWA
+        let supportsPWA = false;
 
         // --- DETECCIÓN DE INSTALACIÓN ---
         let isInstalled = false;
@@ -184,9 +187,7 @@
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             isInstalled = true;
 
-            /* * Se eliminó la alerta automática al cargar la página,
-             * de acuerdo con la solicitud de solo activarla al hacer clic.
-             */
+            /* Eliminamos la alerta automática al cargar la página */
 
             // Oculta la UI de instalación para todos si ya está instalada
             document.querySelector('.card-container').style.display = 'none';
@@ -194,7 +195,24 @@
         }
         // --- FIN DETECCIÓN ---
 
-        // Mostrar según plataforma (Solo si NO está instalada)
+        // PWA Prompt (Activa la bandera supportsPWA y muestra el botón si aplica)
+        if (!isInstalled) {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                supportsPWA = true; // El navegador soporta el prompt
+
+                // *** CAMBIO CLAVE 1: Muestra el botón azul en Android y Desktop si el prompt se dispara ***
+                installPromptDiv.style.display = 'flex';
+                
+                // Si el prompt se dispara en Android, ocultamos el modal de instrucciones manuales.
+                if (isAndroid) {
+                    modalAndroid.style.display = 'none';
+                }
+            });
+        }
+
+        // Mostrar modales de instrucciones para iOS/Android al cargar si NO está instalada y NO hay un botón PWA disponible
         if (!isInstalled) {
             if (isIPhone) {
                 modalIPhone.style.display = 'flex';
@@ -202,30 +220,18 @@
             } else if (isIPad) {
                 modalIPad.style.display = 'flex';
                 instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
-            } else if (isAndroid) {
+            } else if (isAndroid && !supportsPWA) { 
+                // Si es Android y NO se disparó el evento beforeinstallprompt (no soporta el prompt), mostramos el modal manual.
                 modalAndroid.style.display = 'flex';
-            } else {
-                // Para Desktop
-                installPromptDiv.style.display = 'flex';
-                instructions.textContent = 'Haz clic en el botón "Instalar" para añadir la aplicación a tu dispositivo.';
+            } else if (!supportsPWA) { 
+                // Si es Desktop y NO hay prompt PWA, solo mostramos el texto de instrucciones sin el botón PWA inicialmente.
+                installPromptDiv.style.display = 'none'; // Aseguramos que se oculte si supportsPWA es falso inicialmente.
             }
-        }
-
-        // Android PWA (Solo si NO está instalada)
-        if (!isInstalled) {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                // Solo muestra el prompt si es Desktop
-                if (isDesktop) {
-                    installPromptDiv.style.display = 'flex';
-                }
-            });
         }
 
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
-                // Lógica normal de instalación de PWA (Desktop)
+                // Lógica normal de instalación de PWA (Desktop/Android con Prompt)
                 installPromptDiv.style.display = 'none';
                 statusText.innerHTML = `<div class="loader"></div><span>Instalando...</span>`;
                 instructions.style.display = 'none';
@@ -238,9 +244,13 @@
                 }
                 deferredPrompt = null;
             } else {
-                // *** ALERTA: Solo al hacer clic, si NO hay prompt, y es Desktop. ***
+                // *** ALERTA/MODAL FALLBACK: Se activa al hacer clic, si NO hay prompt. ***
                 if (isDesktop) {
+                    // Regla de alerta para Desktop
                     alert('La aplicación ya se encuentra instalada o no se puede instalar.');
+                } else if (isAndroid) {
+                    // Fallback para Android si el botón se presionó sin prompt.
+                    modalAndroid.style.display = 'flex';
                 }
             }
         });
