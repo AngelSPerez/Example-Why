@@ -98,10 +98,6 @@
                 <span class="step-number">2</span>
                 <span>Selecciona "<b>Abrir en el navegador</b>".</span>
             </div>
-            <div class="step">
-                <span class="step-number">3</span>
-                <span>Si ya te encuentras en el navegador, puedes cerrar esto.</span>
-            </div>
         </div>
     </div>
 
@@ -146,7 +142,7 @@
 
     <main class="card-container">
         <div class="install-card">
-            <img src="images/icons/icon192.png" alt="Logo de PhotoPea" class="app-icon">
+            <img src="images/icons/icon192.png" alt="Logo de Tldraw" class="app-icon">
             <h1>PhotoPea</h1>
             <h2 id="status-text"><span>Listo para instalar</span></h2>
             <p class="instructions">Haz clic en el botón <strong>Instalar</strong> que aparece en la notificación superior para añadir la aplicación a tu dispositivo.</p>
@@ -159,8 +155,6 @@
         const statusText = document.getElementById('status-text');
         const instructions = document.querySelector('.instructions');
         const modalAndroid = document.getElementById('pwa-modal-android');
-        
-        // IDs actualizados para los nuevos modales
         const modalIPhone = document.getElementById('pwa-modal-iphone');
         const modalIPad = document.getElementById('pwa-modal-ipad');
 
@@ -173,56 +167,40 @@
         const isIPhone = /iPhone/i.test(ua) && !isIPad;
         const isMobile = isAndroid || isIPhone || isIPad;
         const isDesktop = !isMobile;
-
+        
         // Bandera para saber si el navegador soporta el prompt PWA
         let supportsPWA = false;
 
-        // --- DETECCIÓN DE INSTALACIÓN ---
-        let isInstalled = false;
-        // Comprueba el modo de visualización estándar y el booleano 'standalone' de iOS
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-            isInstalled = true;
+        // PWA Prompt (Para Android y Desktop)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            supportsPWA = true;
+
+            // Muestra el botón azul en Android y Desktop si el prompt se dispara
+            installPromptDiv.style.display = 'flex';
             
-            // Eliminamos la alerta automática al cargar la página
-            
-            // Oculta la UI de instalación
-            document.querySelector('.card-container').style.display = 'none';
-            installPromptDiv.style.display = 'none';
-        }
-        // --- FIN DETECCIÓN ---
-
-        // PWA Prompt (Activa la bandera supportsPWA y muestra el botón si aplica)
-        if (!isInstalled) {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                supportsPWA = true; // El navegador soporta el prompt
-
-                // *** CAMBIO CLAVE 1: Muestra el botón azul en Android y Desktop si el prompt se dispara ***
-                installPromptDiv.style.display = 'flex';
-                
-                // Si el prompt se dispara en Android, ocultamos el modal de instrucciones manuales.
-                if (isAndroid) {
-                    modalAndroid.style.display = 'none';
-                }
-            });
-        }
-
-        // Mostrar modales de instrucciones para iOS/Android al cargar si NO está instalada y NO hay un botón PWA disponible
-        if (!isInstalled) {
-            if (isIPhone) {
-                modalIPhone.style.display = 'flex';
-                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPhone.';
-            } else if (isIPad) {
-                modalIPad.style.display = 'flex';
-                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
-            } else if (isAndroid && !supportsPWA) { 
-                // Si es Android y NO se disparó el evento beforeinstallprompt (no soporta el prompt), mostramos el modal manual.
-                modalAndroid.style.display = 'flex';
-            } else if (!supportsPWA) { 
-                // Si es Desktop y NO hay prompt PWA, solo mostramos el texto de instrucciones sin el botón PWA inicialmente.
-                installPromptDiv.style.display = 'none'; // Aseguramos que se oculte si supportsPWA es falso inicialmente.
+            // Si el prompt se dispara en Android, ocultamos el modal de instrucciones manuales
+            if (isAndroid) {
+                modalAndroid.style.display = 'none';
             }
+        });
+
+        // Mostrar modales de instrucciones para iOS/Android al cargar
+        if (isIPhone) {
+            // SIEMPRE mostrar modal en iPhone
+            modalIPhone.style.display = 'flex';
+            instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPhone.';
+        } else if (isIPad) {
+            // SIEMPRE mostrar modal en iPad
+            modalIPad.style.display = 'flex';
+            instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
+        } else if (isAndroid && !supportsPWA) { 
+            // Solo mostrar modal Android si no hay prompt
+            modalAndroid.style.display = 'flex';
+        } else if (!supportsPWA) { 
+            // Desktop sin prompt PWA
+            installPromptDiv.style.display = 'none';
         }
 
         installButton.addEventListener('click', async () => {
@@ -240,51 +218,25 @@
                 }
                 deferredPrompt = null;
             } else {
-                // *** ALERTA/MODAL FALLBACK: Se activa al hacer clic, si NO hay prompt. ***
+                // Fallback si no hay prompt
                 if (isDesktop) {
-                    // Regla de alerta para Desktop
                     alert('La aplicación ya se encuentra instalada o no se puede instalar.');
                 } else if (isAndroid) {
-                    // Fallback para Android si el botón se presionó sin prompt.
                     modalAndroid.style.display = 'flex';
                 }
             }
         });
 
-        // --- Redirección solo en PC ---
+        // Redirección solo en Desktop después de instalar
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
 
-            // Redirección solo si es Desktop
             if (isDesktop) {
                 setTimeout(() => {
                     window.location.href = 'index.html';
-                }, 1000); // 1000 ms = 1 segundo
+                }, 1000);
             }
         });
-
-        // --- Botones de cierre para modales ---
-        const createCloseButton = (modal) => {
-            const btn = document.createElement('button');
-            btn.textContent = '✖';
-            btn.style.position = 'absolute';
-            btn.style.top = '10px';
-            btn.style.right = '10px';
-            btn.style.background = 'transparent';
-            btn.style.color = '#fff';
-            btn.style.border = 'none';
-            btn.style.fontSize = '18px';
-            btn.style.cursor = 'pointer';
-            btn.addEventListener('click', () => { modal.style.display = 'none'; });
-            modal.querySelector('.modal-content').appendChild(btn);
-        }
-
-        // Solo crea el botón de cierre para Android (si no está instalada)
-        if (!isInstalled) {
-            createCloseButton(modalAndroid);
-        }
-        
-        // NO llamamos a createCloseButton para modalIPhone o modalIPad
 
     </script>
 </body>
