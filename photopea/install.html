@@ -105,7 +105,6 @@
         </div>
     </div>
 
-    <!-- Modales separados para iPhone y iPad -->
     <div id="pwa-modal-iphone" class="modal-overlay">
         <div class="modal-content">
             <h2>Instalar en iPhone</h2>
@@ -140,22 +139,6 @@
         </div>
     </div>
 
-    <!-- Modal para fallback de instalación (reemplaza alert) -->
-    <div id="fallback-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Instrucciones de Instalación</h2>
-            <p>Para instalar la aplicación:</p>
-            <div class="step" style="align-items: baseline;">
-                <span style="margin-right: 8px;">•</span>
-                <span><b>Chrome/Edge</b>: usa el icono "+" en la barra de direcciones o el menú "Instalar".</span>
-            </div>
-            <div class="step" style="align-items: baseline;">
-                <span style="margin-right: 8px;">•</span>
-                <span><b>Safari</b>: abre el menú "Compartir" y elige "Añadir a inicio".</span>
-            </div>
-        </div>
-    </div>
-
     <div id="install-prompt">
         <span>Instala la aplicación para un acceso rápido</span>
         <button id="install-button">Instalar</button>
@@ -163,8 +146,7 @@
 
     <main class="card-container">
         <div class="install-card">
-            <!-- Contenido del nuevo archivo -->
-            <img src="images/icons/icon192.png" alt="Logo de Online Sequencer" class="app-icon">
+            <img src="images/icons/icon192.png" alt="Logo de PhotoPea" class="app-icon">
             <h1>PhotoPea</h1>
             <h2 id="status-text"><span>Listo para instalar</span></h2>
             <p class="instructions">Haz clic en el botón <strong>Instalar</strong> que aparece en la notificación superior para añadir la aplicación a tu dispositivo.</p>
@@ -181,9 +163,17 @@
         // IDs actualizados para los nuevos modales
         const modalIPhone = document.getElementById('pwa-modal-iphone');
         const modalIPad = document.getElementById('pwa-modal-ipad');
-        const modalFallback = document.getElementById('fallback-modal');
+        // const modalFallback = document.getElementById('fallback-modal'); // Se elimina
 
         let deferredPrompt;
+
+        // Detección de User Agent
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /Android/i.test(ua);
+        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isIPhone = /iPhone/i.test(ua) && !isIPad;
+        const isMobile = isAndroid || isIPhone || isIPad;
+        const isDesktop = !isMobile;
 
         // --- DETECCIÓN DE INSTALACIÓN ---
         let isInstalled = false;
@@ -191,24 +181,13 @@
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             isInstalled = true;
             
-            // Muestra estado de instalación en lugar de alert
-            statusText.innerHTML = '<span>Ya está instalado</span>';
-            instructions.textContent = 'Puedes cerrar esta pestaña y abrir la aplicación desde tu pantalla de inicio.';
-
-            // Oculta el prompt de instalación de escritorio
+            // *** MODIFICACIÓN: Eliminamos la alerta automática al cargar la página ***
+            
+            // Oculta la UI de instalación
+            document.querySelector('.card-container').style.display = 'none';
             installPromptDiv.style.display = 'none';
         }
         // --- FIN DETECCIÓN ---
-
-        // Detección de User Agent actualizada
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        const isAndroid = /Android/i.test(ua);
-        
-        // Detección específica para iPad (incluye iPadOS 13+ que se reporta como Mac)
-        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        
-        // Detección de iPhone (asegurándose que no sea un iPad)
-        const isIPhone = /iPhone/i.test(ua) && !isIPad;
 
         // Mostrar según plataforma (Solo si NO está instalada)
         if (!isInstalled) {
@@ -227,13 +206,13 @@
             }
         }
 
-        // Android PWA (Solo si NO está instalada)
+        // PWA Prompt (Solo si NO está instalada)
         if (!isInstalled) {
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                // Solo muestra el prompt si no es iOS o Android (es decir, desktop)
-                if (!isIPhone && !isIPad && !isAndroid) {
+                // Solo muestra el prompt si es Desktop
+                if (isDesktop) {
                     installPromptDiv.style.display = 'flex';
                 }
             });
@@ -241,6 +220,7 @@
 
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
+                // Lógica de instalación PWA
                 installPromptDiv.style.display = 'none';
                 statusText.innerHTML = `<div class="loader"></div><span>Instalando...</span>`;
                 instructions.style.display = 'none';
@@ -253,8 +233,10 @@
                 }
                 deferredPrompt = null;
             } else {
-                // Muestra el modal de fallback en lugar de un alert
-                modalFallback.style.display = 'flex';
+                // *** ALERTA: Solo se activa al hacer clic, si NO hay prompt, y es Desktop. ***
+                if (isDesktop) {
+                    alert('La aplicación ya se encuentra instalada o no se puede instalar.');
+                }
             }
         });
 
@@ -262,8 +244,8 @@
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
 
-            // Usamos la detección actualizada
-            if (!isIPhone && !isIPad && !isAndroid) {
+            // Redirección solo si es Desktop
+            if (isDesktop) {
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000); // 1000 ms = 1 segundo
@@ -286,10 +268,10 @@
             modal.querySelector('.modal-content').appendChild(btn);
         }
 
-        // Solo crea el botón de cierre para Android y Fallback (si no está instalada)
+        // Solo crea el botón de cierre para Android (si no está instalada)
         if (!isInstalled) {
             createCloseButton(modalAndroid);
-            createCloseButton(modalFallback);
+            // Ya no creamos el botón de cierre para modalFallback ya que fue eliminado
         }
         
         // NO llamamos a createCloseButton para modalIPhone o modalIPad
