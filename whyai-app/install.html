@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instalador de WhyAI</title>
+    <title>Instalador de WhyStore</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
@@ -105,8 +105,7 @@
         </div>
     </div>
 
-    <!-- Modales separados para iPhone y iPad -->
-    <div id="pwa-modal-iphone" class="modal-overlay"> <!-- ID actualizado de pwa-modal-ios -->
+    <div id="pwa-modal-iphone" class="modal-overlay">
         <div class="modal-content">
             <h2>Instalar en iPhone</h2>
             <p>Sigue estos pasos para instalar la WhyApp:</p>
@@ -121,7 +120,7 @@
         </div>
     </div>
 
-    <div id="pwa-modal-ipad" class="modal-overlay"> <!-- Modal de iPad añadido -->
+    <div id="pwa-modal-ipad" class="modal-overlay">
         <div class="modal-content">
             <h2>Instalar en iPad</h2>
             <p>Sigue estos pasos para instalar la WhyApp:</p>
@@ -140,22 +139,6 @@
         </div>
     </div>
 
-    <!-- Modal para fallback de instalación (reemplaza alert) -->
-    <div id="fallback-modal" class="modal-overlay"> <!-- Modal de fallback añadido -->
-        <div class="modal-content">
-            <h2>Instrucciones de Instalación</h2>
-            <p>Para instalar la aplicación:</p>
-            <div class="step" style="align-items: baseline;">
-                <span style="margin-right: 8px;">•</span>
-                <span><b>Chrome/Edge</b>: usa el icono "+" en la barra de direcciones o el menú "Instalar".</span>
-            </div>
-            <div class="step" style="align-items: baseline;">
-                <span style="margin-right: 8px;">•</span>
-                <span><b>Safari</b>: abre el menú "Compartir" y elige "Añadir a inicio".</span>
-            </div>
-        </div>
-    </div>
-
     <div id="install-prompt">
         <span>Instala la aplicación para un acceso rápido</span>
         <button id="install-button">Instalar</button>
@@ -163,7 +146,6 @@
 
     <main class="card-container">
         <div class="install-card">
-            <!-- Contenido del nuevo archivo -->
             <img src="icons/logo192.png" alt="Logo de WhyAI" class="app-icon">
             <h1>WhyAI</h1>
             <h2 id="status-text"><span>Listo para instalar</span></h2>
@@ -179,38 +161,34 @@
         const modalAndroid = document.getElementById('pwa-modal-android');
         
         // IDs actualizados para los nuevos modales
-        const modalIPhone = document.getElementById('pwa-modal-iphone'); // Actualizado
-        const modalIPad = document.getElementById('pwa-modal-ipad'); // Añadido
-        const modalFallback = document.getElementById('fallback-modal'); // Añadido
+        const modalIPhone = document.getElementById('pwa-modal-iphone');
+        const modalIPad = document.getElementById('pwa-modal-ipad');
 
         let deferredPrompt;
 
-        // --- DETECCIÓN DE INSTALACIÓN --- (Añadido)
+        // Detección de User Agent
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /Android/i.test(ua);
+        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isIPhone = /iPhone/i.test(ua) && !isIPad;
+        const isMobile = isAndroid || isIPhone || isIPad;
+        const isDesktop = !isMobile;
+
+        // --- DETECCIÓN DE INSTALACIÓN ---
         let isInstalled = false;
         // Comprueba el modo de visualización estándar y el booleano 'standalone' de iOS
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             isInstalled = true;
             
-            // Muestra estado de instalación en lugar de alert
-            statusText.innerHTML = '<span>Ya está instalado</span>';
-            instructions.textContent = 'Puedes cerrar esta pestaña y abrir la aplicación desde tu pantalla de inicio.';
-
-            // Oculta el prompt de instalación de escritorio
+            // *** REGLA 1: Eliminamos la alerta automática al cargar la página ***
+            
+            // Oculta la UI de instalación
+            document.querySelector('.card-container').style.display = 'none';
             installPromptDiv.style.display = 'none';
         }
         // --- FIN DETECCIÓN ---
 
-        // Detección de User Agent actualizada (Actualizado)
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        const isAndroid = /Android/i.test(ua);
-        
-        // Detección específica para iPad (incluye iPadOS 13+ que se reporta como Mac)
-        const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        
-        // Detección de iPhone (asegurándose que no sea un iPad)
-        const isIPhone = /iPhone/i.test(ua) && !isIPad;
-
-        // Mostrar según plataforma (Solo si NO está instalada) (Actualizado)
+        // Mostrar según plataforma (Solo si NO está instalada)
         if (!isInstalled) {
             if (isIPhone) {
                 modalIPhone.style.display = 'flex';
@@ -227,13 +205,13 @@
             }
         }
 
-        // Android PWA (Solo si NO está instalada) (Actualizado)
+        // PWA Prompt (Solo si NO está instalada)
         if (!isInstalled) {
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                // Solo muestra el prompt si no es iOS o Android (es decir, desktop)
-                if (!isIPhone && !isIPad && !isAndroid) {
+                // Solo muestra el prompt si es Desktop
+                if (isDesktop) {
                     installPromptDiv.style.display = 'flex';
                 }
             });
@@ -241,6 +219,7 @@
 
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
+                // Lógica de instalación PWA
                 installPromptDiv.style.display = 'none';
                 statusText.innerHTML = `<div class="loader"></div><span>Instalando...</span>`;
                 instructions.style.display = 'none';
@@ -253,17 +232,19 @@
                 }
                 deferredPrompt = null;
             } else {
-                // Muestra el modal de fallback en lugar de un alert (Actualizado)
-                modalFallback.style.display = 'flex';
+                // *** REGLA 2 y 3: ALERTA solo al hacer clic, si NO hay prompt, y es Desktop. ***
+                if (isDesktop) {
+                    alert('La aplicación ya se encuentra instalada o no se puede instalar.');
+                }
             }
         });
 
-        // --- Redirección solo en PC --- (Actualizado)
+        // --- Redirección solo en PC ---
         window.addEventListener('appinstalled', () => {
             statusText.innerHTML = '<span>¡Instalación completa!</span>';
 
-            // Usamos la detección actualizada
-            if (!isIPhone && !isIPad && !isAndroid) {
+            // Redirección solo si es Desktop
+            if (isDesktop) {
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000); // 1000 ms = 1 segundo
@@ -286,10 +267,9 @@
             modal.querySelector('.modal-content').appendChild(btn);
         }
 
-        // Solo crea el botón de cierre para Android y Fallback (si no está instalada) (Actualizado)
+        // Solo crea el botón de cierre para Android (si no está instalada)
         if (!isInstalled) {
             createCloseButton(modalAndroid);
-            createCloseButton(modalFallback);
         }
         
         // NO llamamos a createCloseButton para modalIPhone o modalIPad
