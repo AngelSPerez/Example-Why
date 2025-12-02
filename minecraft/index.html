@@ -5,13 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="estilos.css">
     <title>Grids</title>
+
+    <style>
+        /* ===== MODAL OSCURO PARA MÓVILES ===== */
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background: #1e1e1e;
+            color: white;
+            padding: 20px;
+            width: 85%;
+            max-width: 400px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            border: 1px solid #333;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        .modal-content p {
+            font-size: 1rem;
+            color: #d0d0d0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            background: #555;
+        }
+    </style>
 </head>
+
 <body>
     <h2>Versiones</h2>
 
     <div class="contenedor">
 
-        
         <h2>Para PC (MacOS/Windows/Linux)</h2>
         <div class="version">
             <a href="https://angelsperez.github.io/Example-Why/minecraft/1.12.2/mc-1.12.2.html"><h1>Version 1.12.2</h1></a>
@@ -23,25 +81,51 @@
         
         <h2>Para Apple (iOS/iPadOS)</h2>
         <div class="version">
-            <a href="https://eaglercraft.com/play/?version=1.12.2&userscript=flameddogo99-eaglermobile.js"><h1>Version 1.12.2</h1></a>
+            <a href="https://angelsperez.github.io/Example-Why/minecraft/iphone-1.12.2.html"><h1>Version 1.12.2</h1></a>
         </div>
         
         <div class="version">
-            <a href="https://eaglercraft.com/play/?version=1.8.8&userscript=flameddogo99-eaglermobile.jsl"><h1>Version 1.8.8</h1></a>
+            <a href="https://angelsperez.github.io/Example-Why/minecraft/iphone-1.8.8.html"><h1>Version 1.8.8</h1></a>
         </div>
 
         <h2>Para Android</h2>
         <div class="version">
-            <a href="https://eaglercraft.com/play/?version=1.12.2-wasm&userscript=flameddogo99-eaglermobile.js"><h1>Version 1.12.2</h1></a>
+            <a href="https://angelsperez.github.io/Example-Why/minecraft/android-1.12.2.html"><h1>Version 1.12.2</h1></a>
         </div>
         
         <div class="version">
-            <a href="https://eaglercraft.com/play/?version=1.8.8-wasm&userscript=flameddogo99-eaglermobile.js"><h1>Version 1.8.8</h1></a>
+            <a href="https://angelsperez.github.io/Example-Why/minecraft/android-1.8.8.html"><h1>Version 1.8.8</h1></a>
         </div>
 
     </div>
 
+    <!-- ===== MODAL PARA MÓVILES ===== -->
+    <div id="mobileModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModal">✕</button>
+            <h2>Antes de iniciar</h2>
+            <p>Para jugar correctamente, marca la casilla <b>“Touchscreen”</b> en la configuración del juego.</p>
+        </div>
+    </div>
+
     <script>
+        // Detecta si es móvil/tableta (pantalla táctil + max-width)
+        const isMobile = window.matchMedia("(max-width: 1024px)").matches &&
+                        ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
+        const modal = document.getElementById("mobileModal");
+        const closeBtn = document.getElementById("closeModal");
+
+        if (isMobile) {
+            modal.style.display = "flex";
+        }
+
+        closeBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+
+        // Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
@@ -50,8 +134,6 @@
             }); 
         }
     </script>
+
 </body>
 </html>
-
-
-
