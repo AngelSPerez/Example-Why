@@ -60,4 +60,39 @@ a {
     background-color: #72ad4b;
     cursor: pointer;
     transform: scale(1.05);
+
+}
+
+/* RESPONSIVE para móviles en horizontal */
+@media (max-width: 900px) and (orientation: landscape) {
+
+    h2 {
+        font-size: 28px;
+        margin: 10px 0;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .contenedor {
+        width: 80%;
+        height: auto;
+        padding: 30px 20px;
+        gap: 20px;
+        background-size: contain;
+        margin: auto;
+    }
+
+    .version {
+        width: 70%;
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    body {
+        justify-content: flex-start;
+        align-items: center;
+        background-size: cover;
+        background-position: center;
+        padding-top: 20px;
+    }
 }
