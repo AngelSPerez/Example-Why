@@ -1,0 +1,102 @@
+/* --- Globales y Reseteo --- */
+* {
+    /* Esto hace que el padding y borde no 'sumen' al ancho total */
+    box-sizing: border-box; 
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 20px; /* Añade espacio en bordes de pantalla pequeña */
+    background-image: url("fondo.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed; /* Fija el fondo al hacer scroll */
+    
+    /* Metodo moderno para centrar todo */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Asegura que ocupe al menos toda la pantalla */
+    
+    /* Valores por defecto para el texto */
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+h2 {
+    color: white;
+    text-shadow: 2px 2px 4px #000000;
+    font-size: 50px;
+    text-align: center;
+    margin-top: 0; /* Quitamos márgenes innecesarios */
+    margin-bottom: 30px;
+    /* Quitamos 'display: flex' y 'margin-left' que no eran necesarios */
+}
+
+/* --- Contenedor Principal --- */
+.contenedor {
+    /* --- MEJORA DE RESPONSIVIDAD --- */
+    width: 90%;          /* Ocupa el 90% en móviles */
+    max-width: 500px;    /* Pero tiene un máximo en pantallas grandes */
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    background-image: url("tierra.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center; /* Centra la imagen de fondo */
+    
+    padding: 50px; /* Un padding más consistente */
+    gap: 30px; /* Espacio entre los botones */
+    border-radius: 10px;
+    
+    /* --- MEJORA DE FLEXIBILIDAD --- */
+    /* Quitamos 'height: 270px;' para que el 
+       contenedor crezca según su contenido */
+}
+
+/* --- Estilos de Links (Botones) --- */
+a {
+    text-decoration: none; 
+    color: white;
+    width: 100%; /* Hacemos que el link ocupe todo el ancho del .version */
+    display: block; /* Necesario para que el 'width' funcione */
+}
+
+.version {
+    /* --- MEJORA DE RESPONSIVIDAD --- */
+    width: 100%; /* Los botones ocupan todo el ancho del contenedor */
+    
+    border: 3px solid #72ad4b;
+    border-radius: 10px;
+    background-color: #92c95b;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    
+    /* Quitamos 'display: flex' de aquí, lo ponemos en el 'a h1' */
+    /* Quitamos estilos de fuente, los movemos a 'a h1' */
+}
+
+.version:hover {
+    background-color: #72ad4b;
+    cursor: pointer;
+    transform: scale(1.03); /* Un 'scale' más sutil */
+}
+
+/* --- MEJORA DE ESTILOS DE TEXTO --- */
+/* Aplicamos los estilos directamente al H1 dentro del link */
+.version a h1 {
+    font-family: Arial, sans-serif;
+    text-shadow: 2px 2px 2px #000000;
+    font-size: 1.25rem; /* ~20px. 'rem' es mejor para accesibilidad */
+    text-align: center;
+    margin: 0; /* Quitamos el margen por defecto del H1 */
+    padding: 15px 10px; /* Añadimos padding al texto del botón */
+}
