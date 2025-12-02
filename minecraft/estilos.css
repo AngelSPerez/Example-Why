@@ -1,0 +1,63 @@
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-image: url("fondo.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+}
+
+h2 {
+    color: white;
+    font-family: Arial, sans-serif;
+    text-shadow: 2px 2px 4px #000000;
+    font-size: 50px;
+    display: flex;
+    justify-content: center;
+    margin-left: 15px;
+}
+
+.contenedor {
+    width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url("tierra.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    flex-direction: column;
+    padding: 70px 50px;
+    gap: 40px;
+    border-radius: 10px;
+    height: 270px;
+}
+
+a {
+    text-decoration: none; 
+    color: white;
+}
+
+.version {
+    color: white;
+    font-family: Arial, sans-serif;
+    text-shadow: 2px 2px 2px #000000;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    border: 3px solid #72ad4b;
+    border-radius: 10px;
+    background-color: #92c95b;
+    width: 50%;
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.version:hover {
+    background-color: #72ad4b;
+    cursor: pointer;
+    transform: scale(1.05);
+}
