@@ -20,7 +20,9 @@ const STATIC_ASSETS = [
   "1.12.2/mc-1.12.2.html", 
   "1.8.8/mc-1.8.8.html", 
   "images/icon192.png", 
-  "images/icon512.png", 
+  "images/icon512.png",
+  "mc-js-un-updated",
+  "mc-js-updated",
 ];
 
 // --- INSTALL ---
@@ -94,4 +96,5 @@ self.addEventListener('fetch', (event) => {
       }
     })()
   );
+
 });
