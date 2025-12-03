@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #0000ff;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 28px;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .character-card {
+            text-align: center;
+            cursor: pointer;
+            padding: 15px;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .character-card:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .character-card.selected {
+            border-color: #0000ff;
+            background: #e6e6ff;
+        }
+
+        .character-img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .character-name {
+            color: #0000ff;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .race-options {
+            text-align: center;
+        }
+
+        .race-option {
+            display: block;
+            margin: 15px auto;
+            padding: 15px 30px;
+            background: white;
+            border: 2px solid #0000ff;
+            color: #0000ff;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            max-width: 400px;
+        }
+
+        .race-option:hover {
+            background: #0000ff;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .track-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+
+        .track-straight {
+            background-image: url('track_straight.png');
+        }
+
+        .track-oval {
+            background-image: url('track_oval.png');
+        }
+
+        .runner {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .instructions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,255,0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            z-index: 20;
+        }
+
+        .finish-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.95);
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 30;
+        }
+
+        .reset-button {
+            display: block;
+            margin: 20px auto 0;
+            padding: 12px 30px;
+            background: #0000ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reset-button:hover {
+            background: #0000cc;
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .lap-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,255,0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla de selección de personaje -->
+        <div id="characterScreen">
+            <h1>Jugador 1: Selecciona un personaje</h1>
+            <div class="character-grid">
+                <div class="character-card" data-character="jorge">
+                    <img src="jorge.png" alt="Jorge" class="character-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%234A90E2%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22white%22>Jorge</text></svg>'">
+                    <div class="character-name">Jorge</div>
+                </div>
+                <div class="character-card" data-character="moy">
+                    <img src="moy.png" alt="Moy" class="character-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%23F5A623%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22white%22>Moy</text></svg>'">
+                    <div class="character-name">Moy</div>
+                </div>
+                <div class="character-card" data-character="gael">
+                    <img src="gael.png" alt="Gael" class="character-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%23F5A623%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22white%22>Gael</text></svg>'">
+                    <div class="character-name">Gael</div>
+                </div>
+                <div class="character-card" data-character="renata">
+                    <img src="renata.png" alt="Renata" class="character-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%23E91E63%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22white%22>Renata</text></svg>'">
+                    <div class="character-name">Renata</div>
+                </div>
+                <div class="character-card" data-character="apa">
+                    <img src="apa.png" alt="Apa" class="character-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%23E74C3C%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22white%22>Apa</text></svg>'">
+                    <div class="character-name">apa</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de selección de carrera -->
+        <div id="raceScreen" class="hidden">
+            <h1 id="raceTitle">Selecciona la carrera para Jorge y Moy</h1>
+            <div class="race-options">
+                <button class="race-option" data-race="100">1. Carrera de 100m</button>
+                <button class="race-option" data-race="400">2. Carrera de 400m</button>
+                <button class="race-option" data-race="800">3. Carrera de 800m</button>
+            </div>
+        </div>
+
+        <!-- Pantalla de juego -->
+        <div id="gameScreen" class="hidden">
+            <div class="track-container" id="trackContainer">
+                <div class="instructions" id="instructions"></div>
+                <div class="lap-counter hidden" id="lapCounter">Vuelta: 1/2</div>
+                <div class="finish-message" id="finishMessage"></div>
+            </div>
+            <button class="reset-button" onclick="resetGame()">Reiniciar</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedCharacters = [];
+        let currentPlayer = 1;
+        let gameState = {
+            race: null,
+            players: [],
+            positions: [],
+            finished: [],
+            laps: []
+        };
+        let keysPressed = {
+            space: false,
+            w: false
+        };
+
+        // Selección de personajes
+        document.querySelectorAll('.character-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const character = this.dataset.character;
+                
+                if (selectedCharacters.length < 2 && !selectedCharacters.includes(character)) {
+                    selectedCharacters.push(character);
+                    this.classList.add('selected');
+                    
+                    if (selectedCharacters.length === 2) {
+                        setTimeout(() => {
+                            document.getElementById('characterScreen').classList.add('hidden');
+                            document.getElementById('raceScreen').classList.remove('hidden');
+                            document.getElementById('raceTitle').textContent = 
+                                `Selecciona la carrera para ${selectedCharacters[0]} y ${selectedCharacters[1]}`;
+                        }, 500);
+                    } else {
+                        currentPlayer++;
+                        document.querySelector('#characterScreen h1').textContent = 
+                            `Jugador ${currentPlayer}: Selecciona un personaje`;
+                    }
+                }
+            });
+        });
+
+        // Selección de carrera
+        document.querySelectorAll('.race-option').forEach(button => {
+            button.addEventListener('click', function() {
+                const raceDistance = this.dataset.race;
+                startRace(raceDistance);
+            });
+        });
+
+        function startRace(distance) {
+            gameState.race = distance;
+            gameState.players = selectedCharacters.map((char, i) => ({
+                name: char,
+                position: 0,
+                lane: i,
+                finished: false,
+                lap: 1
+            }));
+            
+            document.getElementById('raceScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            setupTrack(distance);
+        }
+
+        function setupTrack(distance) {
+            const container = document.getElementById('trackContainer');
+            const instructions = document.getElementById('instructions');
+            const lapCounter = document.getElementById('lapCounter');
+            
+            container.innerHTML = '';
+            
+            if (distance === '100') {
+                container.classList.add('track-straight');
+                container.classList.remove('track-oval');
+                lapCounter.classList.add('hidden');
+                
+                instructions.innerHTML = `${selectedCharacters[0]}: Presiona ESPACIO<br>
+                                         ${selectedCharacters[1]}: Presiona W`;
+            } else {
+                container.classList.add('track-oval');
+                container.classList.remove('track-straight');
+                lapCounter.classList.remove('hidden');
+                lapCounter.textContent = 'Vuelta: 1/' + (distance === '400' ? '1' : '2');
+                
+                instructions.innerHTML = `${selectedCharacters[0]}: Presiona ESPACIO<br>
+                                         ${selectedCharacters[1]}: Presiona W`;
+            }
+            
+            container.appendChild(instructions);
+            container.appendChild(lapCounter);
+            
+            // Crear corredores
+            gameState.players.forEach((player, index) => {
+                const runner = document.createElement('img');
+                runner.className = 'runner';
+                runner.id = `runner${index}`;
+                runner.src = `${player.name}.png`;
+                runner.onerror = function() {
+                    this.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="${index === 0 ? '%234A90E2' : '%23F5A623'}"/></svg>`;
+                };
+                
+                if (distance === '100') {
+                    runner.style.left = '20px';
+                    runner.style.top = `${180 + index * 60}px`;
+                } else {
+                    // Posición inicial para pista oval (lado derecho)
+                    runner.style.left = '720px';
+                    runner.style.top = `${160 + index * 80}px`;
+                }
+                
+                container.appendChild(runner);
+            });
+            
+            const finishDiv = document.createElement('div');
+            finishDiv.className = 'finish-message';
+            finishDiv.id = 'finishMessage';
+            container.appendChild(finishDiv);
+        }
+
+        // Control de teclas - detectar cuando se presionan
+        document.addEventListener('keydown', function(e) {
+            if (gameState.race === null) return;
+            
+            if (e.code === 'Space') {
+                e.preventDefault();
+                keysPressed.space = true;
+            } else if (e.code === 'KeyW') {
+                keysPressed.w = true;
+            }
+        });
+
+        // Control de teclas - detectar cuando se sueltan
+        document.addEventListener('keyup', function(e) {
+            if (e.code === 'Space') {
+                keysPressed.space = false;
+            } else if (e.code === 'KeyW') {
+                keysPressed.w = false;
+            }
+        });
+
+        // Loop de juego que se ejecuta continuamente
+        function gameLoop() {
+            if (gameState.race !== null) {
+                if (keysPressed.space) {
+                    movePlayer(0);
+                }
+                if (keysPressed.w) {
+                    movePlayer(1);
+                }
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Iniciar el loop de juego
+        gameLoop();
+
+        function movePlayer(playerIndex) {
+            const player = gameState.players[playerIndex];
+            if (player.finished) return;
+            
+            const runner = document.getElementById(`runner${playerIndex}`);
+            const distance = gameState.race;
+            
+            if (distance === '100') {
+                // Carrera recta
+                player.position += 5;
+                runner.style.left = (20 + player.position) + 'px';
+                
+                if (player.position >= 700) {
+                    finishPlayer(playerIndex);
+                }
+            } else {
+                // Carrera oval - movimiento alrededor de la pista
+                player.position += 2;
+                const totalDistance = distance === '400' ? 800 : 1600; // Una vuelta = 800 unidades
+                const lapsNeeded = distance === '400' ? 1 : 2;
+                
+                // Calcular vuelta actual
+                const currentLap = Math.floor(player.position / 800) + 1;
+                if (currentLap > player.lap && currentLap <= lapsNeeded) {
+                    player.lap = currentLap;
+                    updateLapCounter();
+                }
+                
+                // Calcular posición en la pista oval
+                const posInLap = player.position % 800;
+                const progress = posInLap / 800; // 0 a 1
+                
+                // Definir la pista oval como un recorrido de 4 secciones
+                const centerX = 400;
+                const centerY = 200;
+                const radiusX = 300;
+                const radiusY = 140;
+                
+                let x, y;
+                
+                // Convertir progreso a ángulo (comenzar desde el lado derecho, ir en sentido antihorario)
+                const angle = progress * Math.PI * 2;
+                
+                x = centerX + radiusX * Math.cos(angle);
+                y = centerY - radiusY * Math.sin(angle);
+                
+                // Separar carriles
+                const laneOffset = playerIndex * 40;
+                const offsetX = laneOffset * Math.cos(angle);
+                const offsetY = -laneOffset * Math.sin(angle);
+                
+                runner.style.left = (x + offsetX) + 'px';
+                runner.style.top = (y + offsetY) + 'px';
+                
+                if (player.position >= totalDistance) {
+                    finishPlayer(playerIndex);
+                }
+            }
+        }
+
+        function updateLapCounter() {
+            const lapCounter = document.getElementById('lapCounter');
+            const maxLap = Math.max(...gameState.players.map(p => p.lap));
+            const totalLaps = gameState.race === '400' ? 1 : 2;
+            lapCounter.textContent = `Vuelta: ${maxLap}/${totalLaps}`;
+        }
+
+        function finishPlayer(playerIndex) {
+            const player = gameState.players[playerIndex];
+            player.finished = true;
+            gameState.finished.push(player.name);
+            
+            if (gameState.finished.length === gameState.players.length) {
+                showFinishMessage();
+            }
+        }
+
+        function showFinishMessage() {
+            const message = document.getElementById('finishMessage');
+            message.innerHTML = gameState.finished.map((name, i) => 
+                `${i + 1}° lugar: ${name}${i === 0 ? ' 🏆' : ''}`
+            ).join('<br>');
+            message.style.display = 'block';
+        }
+
+        function resetGame() {
+            selectedCharacters = [];
+            currentPlayer = 1;
+            gameState = {
+                race: null,
+                players: [],
+                positions: [],
+                finished: [],
+                laps: []
+            };
+            keysPressed = {
+                space: false,
+                w: false
+            };
+            
+            document.querySelectorAll('.character-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('characterScreen').classList.remove('hidden');
+            document.querySelector('#characterScreen h1').textContent = 
+                'Jugador 1: Selecciona un personaje';
+        }
+    </script>
+        <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+              .then(reg => console.log('✅ Service Worker registrado con éxito:', reg.scope))
+              .catch(err => console.log('❌ Error al registrar el Service Worker:', err));
+          });
+        }
+    </script>
+</body>
+</html>
