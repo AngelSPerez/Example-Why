@@ -1,7 +1,7 @@
 {
-    "name": "DrumBit",
-    "short_name": "DrumBit",
-    "description": "DrumBit",
+    "name": "Soundtrap",
+    "short_name": "Soundtrap",
+    "description": "Soundtrap",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#181818",
