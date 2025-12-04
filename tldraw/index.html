@@ -3,13 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirigiendo a Tldraw</title>
+    <title>Lanzar Tldraw</title>
     
-    <meta http-equiv="refresh" content="0; url=https://www.tldraw.com/">
-    
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+        }
+        .main-button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background-color: #3f51b5; /* Un color atractivo */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .main-button:hover {
+            background-color: #303f9f;
+        }
+    </style>
 </head>
 <body>
-    <p>Redirigiendo a Tldraw.com...</p>
-    <p>Si la redirección no funciona, haz clic aquí: <a href="https://www.tldraw.com/">Tldraw</a></p>
+    
+    <h1>Abrir Tldraw</h1>
+    <p>Haz clic en el botón para iniciar Tldraw en una ventana simplificada.</p>
+
+    <button class="main-button" onclick="openTldraw()">
+        Iniciar Tldraw 🚀
+    </button>
+    
+    <script>
+        function openTldraw() {
+            const url = 'https://www.tldraw.com/';
+            const windowName = '_blank';
+            
+            // Opciones para la ventana pop-up (intentando ocultar barras)
+            // NOTA: Los navegadores modernos pueden ignorar estas opciones.
+            const features = 'width=1200,height=800,toolbar=no,location=no,menubar=no,status=no';
+            
+            // Abre la nueva ventana con las opciones especificadas
+            window.open(url, windowName, features);
+        }
+    </script>
+
 </body>
 </html>
