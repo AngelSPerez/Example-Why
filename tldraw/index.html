@@ -3,56 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lanzar Tldraw</title>
+    <title>Tldraw</title>
     
+    <link rel="manifest" href="manifest.json">
+    
+    <meta name="theme-color" content="#181818">
+
+    <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
+
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: sans-serif;
-            background-color: #f0f0f0;
-        }
-        .main-button {
-            padding: 15px 30px;
-            font-size: 1.2em;
-            cursor: pointer;
-            background-color: #3f51b5; /* Un color atractivo */
-            color: white;
-            border: none;
-            border-radius: 8px;
-            transition: background-color 0.3s;
-        }
-        .main-button:hover {
-            background-color: #303f9f;
-        }
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      .iframe-container {
+        width: 100%;
+        height: 100%;
+      }
+      iframe {
+        border: none;
+      }
     </style>
 </head>
 <body>
-    
-    <h1>Abrir Tldraw</h1>
-    <p>Haz clic en el botón para iniciar Tldraw en una ventana simplificada.</p>
-
-    <button class="main-button" onclick="openTldraw()">
-        Iniciar Tldraw 🚀
-    </button>
-    
-    <script>
-        function openTldraw() {
-            const url = 'https://www.tldraw.com/';
-            const windowName = '_blank';
-            
-            // Opciones para la ventana pop-up (intentando ocultar barras)
-            // NOTA: Los navegadores modernos pueden ignorar estas opciones.
-            const features = 'width=1200,height=800,toolbar=no,location=no,menubar=no,status=no';
-            
-            // Abre la nueva ventana con las opciones especificadas
-            window.open(url, windowName, features);
-        }
-    </script>
-
+<div class="iframe-container">
+  <iframe src="https://www.tldraw.com/" width="100%" height="100%"></iframe>
+</div>
 </body>
 </html>
+
