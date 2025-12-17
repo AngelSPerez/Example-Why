@@ -1,0 +1,24 @@
+{
+    "name": "Picsart",
+    "short_name": "Picsart",
+    "description": "Picsart es una aplicación de edición de fotos y videos todo en uno que permite a los usuarios crear, editar y compartir contenido visual de alta calidad con una amplia gama de herramientas creativas.",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#181818",
+    "theme_color": "#181818",
+    "orientation": "any",
+    "icons": [
+      {
+        "src": "icon192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icon512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
+      }
+    ]
+  }
