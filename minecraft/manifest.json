@@ -1,7 +1,7 @@
 {
-    "name": "Minecraft: Java Edition",
-    "short_name": "Minecraft",
-    "description": "Minecraft",
+    "name": "BlockCraft",
+    "short_name": "BlockCraft",
+    "description": "BlockCraft",
     "start_url": "./index.html",
     "display": "fullscreen",
     "background_color": "#181818",
@@ -23,3 +23,4 @@
     ]
 
   }
+
