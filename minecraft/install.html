@@ -210,14 +210,14 @@
             // En Linux, solo permitir Chrome, Edge o Vivaldi.
             // Si NO es ninguno de estos (ej: Firefox, Opera en Linux), mostrar modal.
             if (!(isChrome || isEdge || isVivaldi)) {
-                browserWarningText.textContent = 'Esta app solo se puede instalar usando "Google Chrome", "Microsoft Edge" o "Vivaldi".';
+                browserWarningText.textContent = 'Esta app solo se puede instalar usando Brave, Google Chrome, Microsoft Edge o Vivaldi.';
                 modalBrowserWarning.style.display = 'flex';
                 browserBlocked = true;
             }
         } 
         else if (isWindows && isOpera) {
             // En Windows, bloquear Opera específicamente.
-            browserWarningText.textContent = 'El navegador Opera no soporta la instalación de esta aplicación en Windows correctamente. Por favor, utiliza Google Chrome o Microsoft Edge.';
+            browserWarningText.textContent = 'El navegador Opera no soporta la instalación de esta aplicación en Windows correctamente. Por favor, otro navegador.';
             modalBrowserWarning.style.display = 'flex';
             browserBlocked = true;
         }
@@ -312,3 +312,4 @@
     </script>
 </body>
 </html>
+
