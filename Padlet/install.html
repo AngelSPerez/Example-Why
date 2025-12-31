@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instalador de WhyStore</title>
-    
+
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
@@ -68,6 +68,11 @@
             background-color: rgba(0, 0, 0, 0.7); display: none;
             justify-content: center; align-items: center; z-index: 2000;
         }
+        /* Clase específica para el nuevo modal de advertencia */
+        .warning-overlay {
+            background-color: rgba(0, 0, 0, 0.85); /* Un poco más oscuro para resaltar la advertencia */
+        }
+
         .modal-content {
             background-color: #282828; padding: 25px; border-radius: 16px;
             width: 90%; max-width: 320px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
@@ -79,13 +84,24 @@
         .modal-content .step-number { background-color: #444; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; }
         .modal-content .three-dots { font-weight: bold; font-size: 20px; vertical-align: middle; }
 
+        /* Estilo para el icono de advertencia */
+        .warning-icon { font-size: 30px; margin-bottom: 10px; display: block; text-align: center; }
+
         @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95);} to { opacity: 1; transform: scale(1);} }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px);} to { opacity: 1; transform: translateY(0);} }
     </style>
 </head>
 <body>
-    
+
+    <div id="browser-warning-modal" class="modal-overlay warning-overlay">
+        <div class="modal-content" style="text-align: center;">
+            <span class="warning-icon">⚠️</span>
+            <h2 style="text-align: center;">Navegador no compatible</h2>
+            <p id="browser-warning-text"></p>
+        </div>
+    </div>
+
     <div id="pwa-modal-android" class="modal-overlay">
         <div class="modal-content">
             <h2>Últimos pasos en Android</h2>
@@ -142,7 +158,7 @@
 
     <main class="card-container">
         <div class="install-card">
-            <img src="icon192.png" alt="Logo de Padlet" class="app-icon">
+            <img src="icon512.png" alt="Logo de Padlet" class="app-icon">
             <h1>Padlet</h1>
             <h2 id="status-text"><span>Listo para instalar</span></h2>
             <p class="instructions">Haz clic en el botón <strong>Instalar</strong> que aparece en la notificación superior para añadir la aplicación a tu dispositivo.</p>
@@ -154,32 +170,78 @@
         const installButton = document.getElementById('install-button');
         const statusText = document.getElementById('status-text');
         const instructions = document.querySelector('.instructions');
+
+        // Modales
         const modalAndroid = document.getElementById('pwa-modal-android');
         const modalIPhone = document.getElementById('pwa-modal-iphone');
         const modalIPad = document.getElementById('pwa-modal-ipad');
+        const modalBrowserWarning = document.getElementById('browser-warning-modal');
+        const browserWarningText = document.getElementById('browser-warning-text');
 
         let deferredPrompt;
 
-        // Detección de User Agent
+        // Detección de User Agent y Plataforma
         const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const platform = navigator.platform || '';
+
         const isAndroid = /Android/i.test(ua);
         const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isIPhone = /iPhone/i.test(ua) && !isIPad;
         const isMobile = isAndroid || isIPhone || isIPad;
         const isDesktop = !isMobile;
-        
+
+        // Detección de Sistema Operativo Desktop
+        const isLinux = /Linux/i.test(platform) || /Linux/i.test(ua);
+        const isWindows = /Win/i.test(platform) || /Windows/i.test(ua);
+
+        // Detección de Navegadores Específicos
+        const isEdge = ua.indexOf('Edg/') > -1;
+        const isVivaldi = ua.indexOf('Vivaldi') > -1;
+        const isOpera = ua.indexOf('OPR/') > -1 || ua.indexOf('Opera') > -1;
+        // Chrome detecta "Chrome", pero Edge, Vivaldi y Opera también incluyen "Chrome" en su UA.
+        // Verificamos que sea Chrome puro excluyendo los otros.
+        const isChrome = ua.indexOf('Chrome') > -1 && !isEdge && !isVivaldi && !isOpera;
+
+        // --- LÓGICA DE VALIDACIÓN DE NAVEGADORES ---
+
+        let browserBlocked = false;
+
+        if (isLinux) {
+            // En Linux, solo permitir Chrome, Edge o Vivaldi.
+            // Si NO es ninguno de estos (ej: Firefox, Opera en Linux), mostrar modal.
+            if (!(isChrome || isEdge || isVivaldi)) {
+                browserWarningText.textContent = 'Esta app solo se puede instalar usando Brave, Google Chrome, Microsoft Edge o Vivaldi.';
+                modalBrowserWarning.style.display = 'flex';
+                browserBlocked = true;
+            }
+        } 
+        else if (isWindows && isOpera) {
+            // En Windows, bloquear Opera específicamente.
+            browserWarningText.textContent = 'El navegador Opera no soporta la instalación de esta aplicación en Windows correctamente. Por favor, usa otro navegador.';
+            modalBrowserWarning.style.display = 'flex';
+            browserBlocked = true;
+        }
+
+        // --- FIN LÓGICA DE VALIDACIÓN ---
+
         // Bandera para saber si el navegador soporta el prompt PWA
         let supportsPWA = false;
 
         // PWA Prompt (Para Android y Desktop)
         window.addEventListener('beforeinstallprompt', (e) => {
+            // Si el navegador está bloqueado por las reglas anteriores, no hacemos nada.
+            if (browserBlocked) {
+                e.preventDefault();
+                return;
+            }
+
             e.preventDefault();
             deferredPrompt = e;
             supportsPWA = true;
 
             // Muestra el botón azul en Android y Desktop si el prompt se dispara
             installPromptDiv.style.display = 'flex';
-            
+
             // Si el prompt se dispara en Android, ocultamos el modal de instrucciones manuales
             if (isAndroid) {
                 modalAndroid.style.display = 'none';
@@ -187,19 +249,28 @@
         });
 
         // Mostrar modales de instrucciones para iOS/Android al cargar
-        if (isIPhone) {
-            // SIEMPRE mostrar modal en iPhone
-            modalIPhone.style.display = 'flex';
-            instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPhone.';
-        } else if (isIPad) {
-            // SIEMPRE mostrar modal en iPad
-            modalIPad.style.display = 'flex';
-            instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
-        } else if (isAndroid && !supportsPWA) { 
-            // Solo mostrar modal Android si no hay prompt
-            modalAndroid.style.display = 'flex';
-        } else if (!supportsPWA) { 
-            // Desktop sin prompt PWA
+        // (Solo si no está bloqueado por navegador incompatible)
+        if (!browserBlocked) {
+            if (isIPhone) {
+                // SIEMPRE mostrar modal en iPhone
+                modalIPhone.style.display = 'flex';
+                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPhone.';
+            } else if (isIPad) {
+                // SIEMPRE mostrar modal en iPad
+                modalIPad.style.display = 'flex';
+                instructions.textContent = 'Sigue las instrucciones en pantalla para instalar en iPad.';
+            } else if (isAndroid && !supportsPWA) { 
+                // Solo mostrar modal Android si no hay prompt y no se ha disparado beforeinstallprompt aún
+                // (Se maneja visualmente, esperamos un poco o mostramos por defecto)
+                 modalAndroid.style.display = 'flex';
+            } else if (!supportsPWA && isDesktop) { 
+                // Desktop sin prompt PWA y no bloqueado (ej: Firefox en Windows)
+                // Opcional: Podrías ocultar el botón o mostrar otro mensaje, 
+                // pero el script original ocultaba el promptDiv.
+                installPromptDiv.style.display = 'none';
+            }
+        } else {
+            // Si está bloqueado, asegurar que no se vea el botón de instalar
             installPromptDiv.style.display = 'none';
         }
 
