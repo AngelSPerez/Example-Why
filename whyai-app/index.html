@@ -424,7 +424,10 @@
   }
 
   function irOffline() {
-    window.location.href = 'https://angelsperez.github.io/ia-offline/WhyAI%20Offline/install.html', "_blank";
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const baseUrl = 'https://angelsperez.github.io/ia-offline/WhyAI%20Offline/';
+    const url = isMobile ? baseUrl + 'install.html' : baseUrl + 'index.html';
+    window.location.href = url;
   }
 
   document.getElementById('switch-modal').addEventListener('click', function(event) {
@@ -446,5 +449,3 @@
 
 </body>
 </html>
-
-
