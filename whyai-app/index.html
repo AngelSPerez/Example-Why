@@ -356,9 +356,16 @@
       const language = hispanicCountries.includes(country) ? 'es' : 'en';
       aplicarIdioma(language);
     } catch (error) {
-      console.log('No se pudo detectar el idioma, usando inglés por defecto');
-      aplicarIdioma('en');
+      console.log('No se pudo detectar el idioma por IP, intentando con idioma del navegador');
+      detectarIdiomaPorNavegador();
     }
+  }
+
+  function detectarIdiomaPorNavegador() {
+    const userLang = navigator.language || navigator.userLanguage;
+    const language = userLang.toLowerCase().startsWith('es') ? 'es' : 'en';
+    console.log('Idioma detectado del navegador:', userLang, '-> usando:', language);
+    aplicarIdioma(language);
   }
 
   function aplicarIdioma(lang) {
@@ -378,7 +385,7 @@
     
     welcomeTitle.textContent = lang === 'es' ? '📱 ¡Bienvenido a WhyAI!' : '📱 Welcome to WhyAI!';
     welcomeText.innerHTML = t.welcomeText;
-    welcomeButtonDiv.innerHTML = ' ' + t.welcomeButton;
+    welcomeButtonDiv.innerHTML = '👆 ' + t.welcomeButton;
     welcomeFooter.textContent = t.welcomeFooter;
     welcomeBtn.textContent = t.welcomeBtn;
     
@@ -449,4 +456,3 @@
 
 </body>
 </html>
-
